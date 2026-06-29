@@ -1,199 +1,248 @@
-PolicyIQ — Test Question Bank v2 (Document-Agnostic)
+PolicyIQ — Master Test Question Bank v3 (Combined)
 =====================================================
 All questions rewritten to remove explicit standard/document references.
 The model must retrieve and cite sources itself.
 Use for: demo testing, evaluation harness, RAG stress testing, mentor presentation.
+
+Total: 124 questions across 23 categories
+Corpus coverage: OISD (primary), PESO, PNGRB, MoPNG
+Version: Document-agnostic — model must retrieve and cite sources autonomously
 =====================================================
 
 
 1. BASIC COMPLIANCE QUERIES
 ----------------------------
-What is the minimum safe distance required for LPG storage near a process unit?
-How often must fire hydrants be inspected at a petroleum installation?
-What is the minimum fire water flow rate required for a tank farm?
-What is the maximum allowable working pressure for a cross-country petroleum pipeline?
-What is the minimum distance between a flare stack and the nearest process unit?
-How frequently must pressure relief valves be inspected at a hydrocarbon facility?
-Is a hot work permit mandatory before welding near a hydrocarbon storage area?
-What documentation is required before commissioning a new LPG bottling plant?
-What are the fire water storage requirements for petroleum refineries?
-What is the minimum safe distance between a storage tank and a process unit?
+1.  What is the minimum safe distance required for LPG storage near a process unit?
+2.  How often must fire hydrants be inspected at a petroleum installation?
+3.  What is the minimum fire water flow rate required for a tank farm?
+4.  What is the maximum allowable working pressure for a cross-country petroleum pipeline?
+5.  What is the minimum distance between a flare stack and the nearest process unit?
+6.  How frequently must pressure relief valves be inspected at a hydrocarbon facility?
+7.  Is a hot work permit mandatory before welding near a hydrocarbon storage area?
+8.  What documentation is required before commissioning a new LPG bottling plant?
+9.  What are the fire water storage requirements for petroleum refineries?
+10. What is the minimum safe distance between a storage tank and a process unit?
 
 
 2. FOLLOW-UP / CONVERSATIONAL MEMORY TESTS
 --------------------------------------------
 (Run these in sequence as a single conversation)
 
-What is the minimum safe distance for LPG storage near a process unit?
-And what capacity limits apply?
-Any other requirements for the storage tank itself?
-What about for refrigerated LPG storage specifically?
-How does that compare to non-hazardous area requirements?
-Which regulation covers this?
-Is the same standard applicable for mounded storage as well?
+11. What is the minimum safe distance for LPG storage near a process unit?
+12. And what capacity limits apply?
+13. Any other requirements for the storage tank itself?
+14. What about for refrigerated LPG storage specifically?
+15. How does that compare to non-hazardous area requirements?
+16. Which regulation covers this?
+17. Is the same standard applicable for mounded storage as well?
 
 
 3. NUMERICAL EDGE CASES / BOUNDARY CONDITIONS
 ----------------------------------------------
-For an LPG vessel with exactly 20 Cu. Mt. capacity, does it fall under the 15m or 20m safe distance category?
-What is the minimum interdistance between two above-ground LPG storage vessels of different capacities?
-For an LPG bulk tank wagon loading and unloading area, is the safety distance measured from the centre of the railway track, and is this measurement basis consistent across all LPG facility types?
-For an LPG vessel with exactly 40 Cu. Mt. capacity, does it fall in the 20-40 bracket or the 40+ bracket?
-What is the maximum capacity of a petroleum Class C storage installation handled at the Circle Office level, and what happens if capacity exceeds that limit?
+18. For an LPG vessel with exactly 20 Cu. Mt. capacity, does it fall under the 15m or 20m safe distance category?
+19. What is the minimum interdistance between two above-ground LPG storage vessels of different capacities?
+20. For an LPG bulk tank wagon loading and unloading area, is the safety distance measured from the centre of the railway track, and is this measurement basis consistent across all LPG facility types?
+21. For an LPG vessel with exactly 40 Cu. Mt. capacity, does it fall in the 20-40 bracket or the 40+ bracket?
+22. What is the maximum capacity of a petroleum Class C storage installation handled at the Circle Office level, and what happens if capacity exceeds that limit?
 
 
 4. CROSS-DOCUMENT COMPARISON
 ------------------------------
-What are the differences between PESO and OISD requirements for LPG cylinder storage?
-How do the safety distance requirements for tank farms differ between LPG installations and petroleum storage facilities?
-What are the key differences between PNGRB's pipeline safety standards and OISD's pipeline safety management guidelines?
-How do the storage shed requirements under gas cylinder rules differ from LPG installation guidelines?
-What changed in the 2025 amendment to the emergency response and disaster management plan regulations compared to the original 2020 version?
+23. What are the differences between PESO and OISD requirements for LPG cylinder storage?
+24. How do the safety distance requirements for tank farms differ between LPG installations and petroleum storage facilities?
+25. What are the key differences between PNGRB's pipeline safety standards and OISD's pipeline safety management guidelines?
+26. How do the storage shed requirements under gas cylinder rules differ from LPG installation guidelines?
+27. What changed in the 2025 amendment to the emergency response and disaster management plan regulations compared to the original 2020 version?
 
 
 5. PRECEDENCE / LEGAL AUTHORITY
 ---------------------------------
-If PESO's Gas Cylinders Rules and LPG installation safety guidelines specify different safety distances, which takes legal precedence?
-For a petroleum storage installation covered by both PESO's Petroleum Rules and OISD safety standards, which governs actual safety distances and which governs licensing?
-Does PNGRB's regulatory authority extend to LPG storage vessels at a refinery, or does OISD and PESO jurisdiction apply there?
-Does MoPNG have overriding authority over PNGRB regulations for natural gas pipelines, or are they independent frameworks?
-If both OISD and PNGRB specify inspection requirements for a cross-country petroleum pipeline, which authority's requirements take precedence for a PSU like IOCL?
+28. If PESO's Gas Cylinders Rules and LPG installation safety guidelines specify different safety distances, which takes legal precedence?
+29. For a petroleum storage installation covered by both PESO's Petroleum Rules and OISD safety standards, which governs actual safety distances and which governs licensing?
+30. Does PNGRB's regulatory authority extend to LPG storage vessels at a refinery, or does OISD and PESO jurisdiction apply there?
+31. Does MoPNG have overriding authority over PNGRB regulations for natural gas pipelines, or are they independent frameworks?
+32. If both OISD and PNGRB specify inspection requirements for a cross-country petroleum pipeline, which authority's requirements take precedence for a PSU like IOCL?
 
 
 6. PROCEDURAL / APPROVAL SEQUENCE
 ------------------------------------
-What is the full sequence of approvals required from PESO before commissioning a new Auto LPG dispensing station?
-What inspection and testing schedule applies to fire water tanks at petroleum installations?
-What are the mandatory steps an operator must follow after a major pipeline incident under emergency response regulations?
-What PESO approvals are required for constructing a new petroleum Class B storage facility?
-What is the process for getting regulatory compliance certification for a new LNG handling and storage facility?
+33. What is the full sequence of approvals required from PESO before commissioning a new Auto LPG dispensing station?
+34. What inspection and testing schedule applies to fire water tanks at petroleum installations?
+35. What are the mandatory steps an operator must follow after a major pipeline incident under emergency response regulations?
+36. What PESO approvals are required for constructing a new petroleum Class B storage facility?
+37. What is the process for getting regulatory compliance certification for a new LNG handling and storage facility?
 
 
 7. NEGATIVE / TRAP QUERIES (Out-of-Scope)
 -------------------------------------------
-What is the safe distance for CNG storage near a process unit?
-What are the fire protection requirements for LPG bottling plants?
-What is the current market price of crude oil?
-Can you help me draft a leave application?
-What is the weather like today in Paradip?
-What is the current share price of Indian Oil Corporation?
-Who is the CEO of Indian Oil Corporation?
-What is the GDP of India this year?
+38. What is the safe distance for CNG storage near a process unit?
+39. What are the fire protection requirements for LPG bottling plants?
+40. What is the current market price of crude oil?
+41. Can you help me draft a leave application?
+42. What is the weather like today in Paradip?
+43. What is the current share price of Indian Oil Corporation?
+44. Who is the CEO of Indian Oil Corporation?
+45. What is the GDP of India this year?
 
 
 8. SOCIAL / GREETING QUERIES
 ------------------------------
-HELLO
-Hi there
-Good morning
-Thank you
-Thanks for your help
-That was very useful
+46. HELLO
+47. Hi there
+48. Good morning
+49. Thank you
+50. Thanks for your help
+51. That was very useful
 
 
 9. AMBIGUOUS / UNDERSPECIFIED QUERIES
 ---------------------------------------
-What is the minimum safe distance for storage?
-What are the requirements for the tank?
-What does the regulation say about distances?
-What are the inspection requirements?
-What is the standard for LPG?
-What are the fire protection requirements?
+52. What is the minimum safe distance for storage?
+53. What are the requirements for the tank?
+54. What does the regulation say about distances?
+55. What are the inspection requirements?
+56. What is the standard for LPG?
+57. What are the fire protection requirements?
 
 
 10. COMPOUND TRAP QUESTIONS
 -----------------------------
-What are the safety distance requirements for a CNG dispensing station located near an LPG bottling plant?
-What are the fire protection requirements for LNG and LPG installations when they are co-located at the same facility?
-What are the fire protection requirements for an LPG mounded storage facility that also has a cylinder filling station on-site?
+58. What are the safety distance requirements for a CNG dispensing station located near an LPG bottling plant?
+59. What are the fire protection requirements for LNG and LPG installations when they are co-located at the same facility?
+60. What are the fire protection requirements for an LPG mounded storage facility that also has a cylinder filling station on-site?
 
 
 11. MULTI-STANDARD SYNTHESIS
 ------------------------------
-What are the minimum safe distances and inspection frequencies for a fire water storage tank located adjacent to both an LPG storage vessel and a refrigerated LNG tank?
-What are the combined safety distance and fire water requirements for an LPG storage facility located near a refinery process unit?
-If a tank farm is being designed near a non-piggable pipeline, what safety standards apply simultaneously?
-What is the relationship between flaring inspection requirements and LNG handling storage requirements — do they share any common safety distance or inspection frequency standards?
-What are the combined emergency response requirements for a cross-country petroleum pipeline station under both PNGRB and OISD pipeline safety standards?
+61. What are the minimum safe distances and inspection frequencies for a fire water storage tank located adjacent to both an LPG storage vessel and a refrigerated LNG tank?
+62. What are the combined safety distance and fire water requirements for an LPG storage facility located near a refinery process unit?
+63. If a tank farm is being designed near a non-piggable pipeline, what safety standards apply simultaneously?
+64. What is the relationship between flaring inspection requirements and LNG handling storage requirements — do they share any common safety distance or inspection frequency standards?
+65. What are the combined emergency response requirements for a cross-country petroleum pipeline station under both PNGRB and OISD pipeline safety standards?
 
 
 12. MULTI-STEP NUMERICAL REASONING
 -------------------------------------
-If an LPG storage facility has three vessels of 25, 50, and 100 Cu. Mt. capacity, what is the minimum distance each vessel needs from the plant boundary, and does the largest vessel determine the overall facility boundary distance?
-A facility wants to install an LPG storage vessel of 500 Cu. Mt. capacity in a non-hazardous area, located 35 meters from the plant boundary, with fire hydrants spaced at 40 meter intervals. Does this configuration comply with applicable safety requirements, and if not, which specific requirement is violated?
-What is the total minimum fire water flow requirement for a tank farm with two above-ground LPG vessels — one of 100 Cu. Mt. and one of 50 Cu. Mt.?
+66. If an LPG storage facility has three vessels of 25, 50, and 100 Cu. Mt. capacity, what is the minimum distance each vessel needs from the plant boundary, and does the largest vessel determine the overall facility boundary distance?
+67. A facility wants to install an LPG storage vessel of 500 Cu. Mt. capacity in a non-hazardous area, located 35 meters from the plant boundary, with fire hydrants spaced at 40 meter intervals. Does this configuration comply with applicable safety requirements, and if not, which specific requirement is violated?
+68. What is the total minimum fire water flow requirement for a tank farm with two above-ground LPG vessels — one of 100 Cu. Mt. and one of 50 Cu. Mt.?
 
 
 13. SCENARIO-BASED COMPLIANCE
 -------------------------------
-A pipeline corridor gets reclassified from Location Class 1 to Location Class 2 due to population growth over 10 years. What actions are mandatory for the pipeline operator, and what is the maximum time window permitted for compliance after reclassification?
-A petroleum depot has fire hydrants spaced at 50 meter intervals in a hazardous area. Is this compliant, and if not, what corrective action is required?
-An LPG installation has a storage vessel of 200 Cu. Mt. located 25 meters from the plant boundary. Is this compliant, and what is the minimum compliant distance for that vessel capacity?
-A refinery is planning to install a new flare stack. What safety distance and inspection requirements apply simultaneously?
+69. A pipeline corridor gets reclassified from Location Class 1 to Location Class 2 due to population growth over 10 years. What actions are mandatory for the pipeline operator, and what is the maximum time window permitted for compliance after reclassification?
+70. A petroleum depot has fire hydrants spaced at 50 meter intervals in a hazardous area. Is this compliant, and if not, what corrective action is required?
+71. An LPG installation has a storage vessel of 200 Cu. Mt. located 25 meters from the plant boundary. Is this compliant, and what is the minimum compliant distance for that vessel capacity?
+72. A refinery is planning to install a new flare stack. What safety distance and inspection requirements apply simultaneously?
 
 
 14. EXISTING NON-COMPLIANCE SCENARIOS
 ---------------------------------------
-If an existing storage tank doesn't meet the required safety distance norms, what alternative compliance path exists, and what additional fire protection measures are required?
-If an LPG installation was built before the current safety standards were revised, does the operator need to retrofit to meet current distance requirements, or is there a grandfathering provision?
-What should happen if an operator's emergency response plan is found inadequate during a PNGRB inspection?
+73. If an existing storage tank doesn't meet the required safety distance norms, what alternative compliance path exists, and what additional fire protection measures are required?
+74. If an LPG installation was built before the current safety standards were revised, does the operator need to retrofit to meet current distance requirements, or is there a grandfathering provision?
+75. What should happen if an operator's emergency response plan is found inadequate during a PNGRB inspection?
 
 
 15. TERMINOLOGY / DEFINITION PRECISION
 ----------------------------------------
-What is the precise definition of "operational convenience" distance in LPG installation safety standards, and how does it differ from mandatory minimum safety distances?
-Do LPG safety standards distinguish between refrigerated LPG tanks and pressurised LPG storage in terms of safety distance requirements, and if so, what is that distinction based on?
-What is the definition of "Location Class" as used for cross-country natural gas pipelines, and what criteria determine classification?
-What does PNGRB mean by "Technical Standards and Specifications including Safety Standards" and which pipeline activities does it specifically cover?
-What is the difference between a static pressure vessel and a mobile pressure vessel under PESO regulations?
+76. What is the precise definition of "operational convenience" distance in LPG installation safety standards, and how does it differ from mandatory minimum safety distances?
+77. Do LPG safety standards distinguish between refrigerated LPG tanks and pressurised LPG storage in terms of safety distance requirements, and if so, what is that distinction based on?
+78. What is the definition of "Location Class" as used for cross-country natural gas pipelines, and what criteria determine classification?
+79. What does PNGRB mean by "Technical Standards and Specifications including Safety Standards" and which pipeline activities does it specifically cover?
+80. What is the difference between a static pressure vessel and a mobile pressure vessel under PESO regulations?
 
 
 16. CROSS-REGULATORY / MULTI-DOCUMENT DEEP QUERIES
 ----------------------------------------------------
-For a petroleum tank truck loading gantry, what are the safety distance requirements under petroleum rules, and how do these compare to the interdistance requirements for LPG tank trucks?
-What are the minimum safe distances for storing ammonium nitrate near a petroleum storage facility, and are there any additional separation requirements for explosives storage near hydrocarbon installations?
-What pressure testing intervals apply to static and mobile pressure vessels under PESO rules, and how do these compare to pressure vessel inspection requirements for LPG mounded storage?
-What are the PNGRB safety standards for natural gas pipeline leak detection, and how do these align with OISD pipeline safety management requirements for the same scenario?
+81. For a petroleum tank truck loading gantry, what are the safety distance requirements under petroleum rules, and how do these compare to the interdistance requirements for LPG tank trucks?
+82. What are the minimum safe distances for storing ammonium nitrate near a petroleum storage facility, and are there any additional separation requirements for explosives storage near hydrocarbon installations?
+83. What pressure testing intervals apply to static and mobile pressure vessels under PESO rules, and how do these compare to pressure vessel inspection requirements for LPG mounded storage?
+84. What are the PNGRB safety standards for natural gas pipeline leak detection, and how do these align with OISD pipeline safety management requirements for the same scenario?
 
 
 17. MoPNG-SPECIFIC QUERIES
 ----------------------------
-What is MoPNG's role in regulating LPG distribution and pricing for public sector oil marketing companies like IOCL?
-Under MoPNG guidelines, what are the safety obligations of oil CPSEs when operating petroleum storage facilities near residential areas?
-What does MoPNG specify regarding mandatory adoption of OISD standards by PSU refineries and petroleum installations?
-Are MoPNG circulars on natural gas supply guidelines legally binding on IOCL's pipeline operations, or are they advisory in nature?
-What MoPNG regulations govern the import and storage of LNG at Indian ports and terminals operated by PSUs?
-What are the licensing requirements for setting up a new petroleum product storage terminal under MoPNG's downstream framework?
-What is MoPNG's policy on mandatory third-party safety audits for oil refineries, and how frequently are they required?
+85. What is MoPNG's role in regulating LPG distribution and pricing for public sector oil marketing companies like IOCL?
+86. Under MoPNG guidelines, what are the safety obligations of oil CPSEs when operating petroleum storage facilities near residential areas?
+87. What does MoPNG specify regarding mandatory adoption of OISD standards by PSU refineries and petroleum installations?
+88. Are MoPNG circulars on natural gas supply guidelines legally binding on IOCL's pipeline operations, or are they advisory in nature?
+89. What MoPNG regulations govern the import and storage of LNG at Indian ports and terminals operated by PSUs?
+90. What are the licensing requirements for setting up a new petroleum product storage terminal under MoPNG's downstream framework?
+91. What is MoPNG's policy on mandatory third-party safety audits for oil refineries, and how frequently are they required?
 
 
 18. PNGRB-SPECIFIC QUERIES
 ----------------------------
-What are the emergency response requirements for a Tier-1 major accident hazard pipeline, and how often must the emergency response plan be updated?
-What are the mandatory cathodic protection requirements for a buried cross-country petroleum pipeline?
-What changed in PNGRB's latest emergency response amendment — specifically for major incident classification and response timelines?
-What are PNGRB's gas supply guidelines for industrial consumers, and what safety compliance documentation is required before gas supply can be authorised?
-What are the requirements for a pipeline operator to maintain sectionalizing valves on a high-pressure natural gas transmission pipeline?
-What common root causes are cited for pipeline failures in India based on PNGRB's major incident reports?
+92. What are the emergency response requirements for a Tier-1 major accident hazard pipeline, and how often must the emergency response plan be updated?
+93. What are the mandatory cathodic protection requirements for a buried cross-country petroleum pipeline?
+94. What changed in PNGRB's latest emergency response amendment — specifically for major incident classification and response timelines?
+95. What are PNGRB's gas supply guidelines for industrial consumers, and what safety compliance documentation is required before gas supply can be authorised?
+96. What are the requirements for a pipeline operator to maintain sectionalizing valves on a high-pressure natural gas transmission pipeline?
+97. What common root causes are cited for pipeline failures in India based on PNGRB's major incident reports?
 
 
 19. DOCUMENT GAP STRESS TESTS
 -------------------------------
-What are the post-amendment emergency response procedures for a major pipeline incident, and how do they align with fire protection facility requirements for the same scenario?
-What are the specific inspection intervals for non-piggable pipelines, and how do OISD and PNGRB requirements compare for the same pipeline category?
-What safety instrumentation system requirements apply to petroleum installations, and are there any overlapping PESO instrumentation safety requirements?
-What are the cementing operation safety requirements for onshore drilling, and how do they interact with broader drilling safety standards?
+98.  What are the post-amendment emergency response procedures for a major pipeline incident, and how do they align with fire protection facility requirements for the same scenario?
+99.  What are the specific inspection intervals for non-piggable pipelines, and how do OISD and PNGRB requirements compare for the same pipeline category?
+100. What safety instrumentation system requirements apply to petroleum installations, and are there any overlapping PESO instrumentation safety requirements?
+101. What are the cementing operation safety requirements for onshore drilling, and how do they interact with broader drilling safety standards?
 
 
 20. HIGH-COMPLEXITY MULTI-PART QUESTIONS
 ------------------------------------------
-What are the minimum safe distances, fire water requirements, and inspection frequencies for a facility that simultaneously operates an LPG storage installation, a fire water tank, and a flare stack — and are there any inter-facility distance conflicts between the applicable standards?
-For a cross-country petroleum pipeline passing through a populated area (Location Class 2) that also crosses a river, what simultaneous requirements apply from OISD, PNGRB T4S, and PNGRB ERDMP for inspection, emergency response planning, and safety distances from habitation?
-A refinery plans to add an LNG peak-shaving facility adjacent to an existing LPG mounded storage area. What are the inter-facility distance requirements between these two installations, and do PESO pressure vessel rules apply to either or both?
+102. What are the minimum safe distances, fire water requirements, and inspection frequencies for a facility that simultaneously operates an LPG storage installation, a fire water tank, and a flare stack — and are there any inter-facility distance conflicts between the applicable standards?
+103. For a cross-country petroleum pipeline passing through a populated area (Location Class 2) that also crosses a river, what simultaneous requirements apply from OISD, PNGRB T4S, and PNGRB ERDMP for inspection, emergency response planning, and safety distances from habitation?
+104. A refinery plans to add an LNG peak-shaving facility adjacent to an existing LPG mounded storage area. What are the inter-facility distance requirements between these two installations, and do PESO pressure vessel rules apply to either or both?
+
+
+21. HARD OUT-OF-SCOPE (Zero overlap with corpus)
+-------------------------------------------------
+Expected response: Out-of-scope rejection message
+
+105. What is the current crude oil price on MCX?
+106. Who is the current CMD of Indian Oil Corporation?
+107. What is India's GDP growth rate this quarter?
+108. Draft a leave application for 3 days.
+109. What is the weather forecast for Paradip this week?
+110. What is IOCL's share price today?
+111. How do I apply for a job at Indian Oil?
+112. What is the salary structure for IOCL engineers?
+113. Translate this document into Hindi.
+114. Write a poem about petroleum refining.
+
+
+22. ADJACENT DOMAIN (Energy/Industry but outside corpus)
+---------------------------------------------------------
+Expected response: Out-of-scope rejection message
+
+115. What are the safety norms for coal handling plants?
+116. What are DGMS regulations for underground mining near oil fields?
+117. What are AERB safety standards for radiation sources used in pipeline inspection?
+118. What are the BIS standards for LPG cylinder manufacturing quality?
+119. What are CPCB norms for effluent discharge from petroleum refineries?
+120. What are OSHA requirements for offshore drilling platforms?
+121. What are IMO regulations for LNG tanker vessels?
+122. What are the electrical safety requirements under IE Rules for petroleum installations?
+
+
+23. LOOKS IN-SCOPE BUT ISN'T (Trap queries)
+--------------------------------------------
+Expected response: Out-of-scope rejection message
+
+123. What are the safety distances for CNG mother stations?
+124. What are the PESO rules for compressed hydrogen storage?
+125. What are the fire protection norms for ammonia refrigeration plants?
+126. What are the OISD standards for offshore platform fire protection?
+127. What are the pipeline safety requirements for CO2 injection lines?
+128. What are the PNGRB regulations for city gas distribution networks?
 
 
 =====================================================
-TOTAL: 100 questions across 20 categories
-Corpus coverage: OISD (primary), PESO, PNGRB, MoPNG
-Version: Document-agnostic — model must retrieve and cite sources autonomously
+TOTAL: 128 questions across 23 categories
+
+Categories 1-20  : In-scope queries (model must retrieve & cite)
+Categories 21-23 : Out-of-scope queries (model must reject cleanly)
+
+Corpus: OISD (primary), PESO, PNGRB, MoPNG
 =====================================================

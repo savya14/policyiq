@@ -244,12 +244,14 @@ def _above_similarity_threshold(question: str) -> bool:
 # Static responses
 # ─────────────────────────────────────────────────────────────────────────────
 
-_OUT_OF_SCOPE = (
-    "This question is outside the scope of IOCL's indexed policy documents. "
-    "For HR queries, contact your HR Business Partner. "
-    "For procurement, reach the Materials department. "
-    "For safety emergencies, call the Site Safety Officer immediately."
+_NOT_COMPLIANCE = (
+    "That's outside my area. **PolicyIQ** specialises in **Indian petroleum & energy "
+    "compliance** — covering standards from **OISD, PESO, PNGRB, and MoPNG**. Try asking "
+    "about **safety distances**, **fire protection norms**, **inspection frequencies**, or "
+    "**approval procedures**."
 )
+
+_OUT_OF_SCOPE = _NOT_COMPLIANCE
 
 _LOW_SIMILARITY = (
     "I couldn't find a sufficiently relevant section in the policy documents "
@@ -315,30 +317,55 @@ def _build_source_objects(result: dict) -> list[dict]:
     return objects
 
 
+_GREETING_WORDS = {
+    "hi", "hello", "hey", "yo", "sup", "morning", "evening", "afternoon",
+    "good morning", "good evening", "good afternoon", "good night",
+    "greetings", "howdy", "hola", "namaste", "namaskar",
+    "thanks", "thank you", "thankyou", "thx", "ty",
+    "ok", "okay", "cool", "np", "cheers", "noted", "got it",
+    "sure", "alright", "great", "awesome", "perfect",
+    "bye", "goodbye", "see you", "later", "take care",
+    "what's up", "whats up", "wassup",
+}
+
+
+def _is_greeting(question: str) -> bool:
+    """Check if the question is a greeting or acknowledgement."""
+    q = question.strip().lower().rstrip("!?.,:;")
+    # Direct match
+    if q in _GREETING_WORDS:
+        return True
+    # Short phrases (≤4 words) that start with a greeting word
+    words = q.split()
+    if len(words) <= 4 and words[0] in _GREETING_WORDS:
+        return True
+    return False
+
+
 def _handle_general_query(question: str, chat_history: list[dict], language: str = "en") -> str:
     """
-    Answer any GENERAL query — greetings, small talk, casual phrases,
-    general knowledge, maths, coding — using the shared LLM singleton.
-    The LLM responds naturally so "yo", "morning", "cheers", "np" all
-    get a warm human-feeling reply without any hardcoded canned strings.
+    Handle GENERAL (non-compliance) queries.
+    - Greetings and acknowledgements get a warm but compliance-focused response.
+    - Everything else gets the standard refusal message.
     """
+    if not _is_greeting(question):
+        return _NOT_COMPLIANCE
+
+    # For greetings/acks, respond warmly but stay in compliance-assistant role
     llm = _get_llm()
 
     system = (
-        "You are PolicyIQ Assistant — a highly intelligent, helpful AI assistant "
-        "for Indian Oil Corporation Limited (IOCL). You have broad knowledge across "
-        "coding, mathematics, science, history, current affairs, and creative writing, "
-        "and you also specialise in Indian oil and gas policy documents.\n\n"
+        "You are PolicyIQ — a regulatory compliance assistant for "
+        "Indian Oil Corporation Limited (IOCL).\n\n"
         "Response rules:\n"
-        "- Use markdown: bold for key terms, bullets for lists, code blocks for code.\n"
-        "- Match length to complexity — very short for greetings/acks, detailed for complex questions.\n"
-        "- For greetings or casual openers (hi, yo, hey, morning, sup, etc.): respond warmly and briefly, "
-        "  introduce yourself as PolicyIQ Assistant, mention you help with both general questions "
-        "  and IOCL policy documents.\n"
-        "- For acknowledgements (thanks, ok, cool, np, cheers, noted, etc.): respond briefly and warmly.\n"
-        "- For maths or code: show step-by-step working.\n"
-        "- Never start with 'As an AI language model…' or similar filler.\n"
-        "- Never refuse unless the request is genuinely harmful."
+        "- For greetings (hi, hey, morning, etc.): respond warmly and briefly, "
+        "  introduce yourself as PolicyIQ, and mention that you help with "
+        "  regulatory compliance queries about OISD, PESO, PNGRB, and MoPNG standards.\n"
+        "- For acknowledgements (thanks, ok, cool, cheers, etc.): respond briefly and warmly.\n"
+        "- Do NOT offer to help with general knowledge, coding, maths, or any "
+        "  topic outside safety regulations and compliance.\n"
+        "- Keep it to 1–2 sentences maximum.\n"
+        "- Never start with 'As an AI language model…' or similar filler."
     )
 
     if language == "hi":
