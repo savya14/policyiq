@@ -84,6 +84,16 @@ requirements.txt  → Python dependencies
 
 ---
 
+## Run PolicyIQ
+
+```
+git clone https://github.com/savya14/policyiq.git
+cd policyiq
+pip install -r requirements.txt
+# add .env with GROQ_API_KEY
+uvicorn backend.main:app --reload --port 8000
+```
+
 ## Local Setup
 
 ### 1. Clone the repo
