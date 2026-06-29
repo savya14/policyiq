@@ -214,5 +214,5 @@ This project is licensed under the MIT License.
 
 ## Built By
 
-**Savya Raj** — AI Intern, IOCL Paradip Refinery (Summer 2026)
-B.Tech Information Technology, Manipal Academy of Higher Education, Bengaluru (Batch 2028)
+**Savya Raj** — AI Intern, IOCL Paradip Refinery (Summer 2026)  
+B.Tech Information Technology, MIT, Bengaluru (Batch 2028)
