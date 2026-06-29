@@ -16,3 +16,4 @@ documents/
 logs/
 .DS_Store
 Thumbs.db
+frontend/.env.local
