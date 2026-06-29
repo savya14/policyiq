@@ -1,0 +1,66 @@
+{
+  "benchmark_cases": [
+    {
+      "query": "What is the minimum safe distance for LPG storage near a process unit?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    },
+    {
+      "query": "and what capacity?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"],
+      "context": "What is the minimum safe distance for LPG storage near a process unit?"
+    },
+    {
+      "query": "any other requirements for the tank?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"],
+      "context": "What is the minimum safe distance for LPG storage near a process unit?"
+    },
+    {
+      "query": "What's the difference between PESO and OISD requirements for LPG cylinder storage?",
+      "known_sources": ["11_PESO_Gas_Cylinders_Rules_SOP.pdf", "27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    },
+    {
+      "query": "What is the safe distance for an LPG vessel with exactly 20 Cu. Mt. capacity — does it fall under the 15m or 20m category?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    },
+    {
+      "query": "What are the fire hydrant inspection intervals per OISD-141?",
+      "known_sources": ["25_OISD_STD_142_Fire_Fighting_Inspection_Testing.pdf", "27_OISD_STD_144_LPG_Installations_Full.pdf", "02_OISD-STD-116_Fire_Protection_Refineries.pdf"]
+    },
+    {
+      "query": "If PESO's Gas Cylinders Rules and OISD-STD-144 specify different safety distances for LPG cylinder storage, which takes precedence?",
+      "known_sources": ["11_PESO_Gas_Cylinders_Rules_SOP.pdf", "27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    },
+    {
+      "query": "What is the safe distance for CNG storage near a process unit?",
+      "known_sources": ["11_PESO_Gas_Cylinders_Rules_SOP.pdf"]
+    },
+    {
+      "query": "What does OISD-STD-150 say about LPG bottling plant fire protection?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    },
+    {
+      "query": "What's the minimum safe distance for storage?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf", "02_OISD-STD-116_Fire_Protection_Refineries.pdf"]
+    },
+    {
+      "query": "Is fire water storage required to be adjacent to LPG and LNG facilities?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf", "29_OISD_STD_194_LNG_Handling_Storage.pdf"]
+    },
+    {
+      "query": "Can ammonium nitrate be stored near liquid hydrocarbons?",
+      "known_sources": ["37_PESO_Ammonium_Nitrate_Rules_FAQ.pdf"]
+    },
+    {
+      "query": "What is the frequency of inspection for non-piggable pipelines?",
+      "known_sources": ["31_OISD_STD_233_NonPiggable_Pipeline.pdf"]
+    },
+    {
+      "query": "What are the safety requirements for CNG dispensing?",
+      "known_sources": ["11_PESO_Gas_Cylinders_Rules_SOP.pdf"]
+    },
+    {
+      "query": "What is the maximum capacity for a single mounded LPG storage vessel?",
+      "known_sources": ["27_OISD_STD_144_LPG_Installations_Full.pdf"]
+    }
+  ]
+}

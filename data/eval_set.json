@@ -1,0 +1,106 @@
+{
+  "_description": "PolicyIQ Edge Case Evaluation Set — captured from manual testing session 2026-06-13. Each entry documents a real failure mode discovered during testing, with expected behavior for regression testing.",
+  "_version": "1.0",
+  "_created": "2026-06-13",
+  "eval_cases": [
+    {
+      "id": "EC-01",
+      "query": "and what capacity?",
+      "query_type": "follow_up_context",
+      "context_required": "Prior question about LPG safe distance (e.g. 'What is the minimum safe distance for LPG storage near a process unit?')",
+      "expected_behavior": "Must use conversational memory to resolve the pronoun reference and produce a standalone question like 'What capacity range applies to the LPG storage vessel discussed previously?' — then answer using the capacity-based distance table from OISD-STD-144. Must NOT treat this as an out-of-scope or ambiguous question.",
+      "failure_mode_tested": "CONDENSE_PROMPT must resolve follow-up pronouns; pipeline must not gate out short contextual follow-ups.",
+      "correct_answer_note": "OISD-STD-144 has capacity brackets: up to 1 Cu.Mt. = 15m; 1-5 Cu.Mt. = 20m; 5-10 Cu.Mt. = 25m; 10-20 Cu.Mt. = 30m (approx — verify from actual document).",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-02",
+      "query": "any other requirements for the tank?",
+      "query_type": "follow_up_context",
+      "context_required": "Prior conversation about LPG storage vessel safety distances",
+      "expected_behavior": "Must maintain topic context from prior turns and retrieve additional requirements for the LPG vessel/tank discussed. Should surface requirements like earthing, ventilation, marking, firefighting provisions from OISD-STD-144. Must NOT ask for clarification or return out-of-scope response.",
+      "failure_mode_tested": "Conversational memory must persist across generic follow-up phrasing.",
+      "correct_answer_note": "OISD-STD-144 covers additional requirements beyond safe distance: fire hydrants, dyke walls, earthing, ventilation, signage, etc.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-03",
+      "query": "What's the difference between PESO and OISD requirements for LPG cylinder storage?",
+      "query_type": "cross_document_partial",
+      "context_required": "None",
+      "expected_behavior": "Must surface actual figures from BOTH documents if retrieved. Known figures: PESO Gas Cylinders Rules SOP specifies 'Minimum 3.0 m clear safety distances shall be maintained all around toxic gas and flammable gas'. OISD-STD-144 specifies its own distance requirements. Must NOT claim figures are absent when they appear in retrieved context chunks. Must note which side is missing if only one is retrieved, but must never claim absence without re-checking context.",
+      "failure_mode_tested": "Hallucination of absence — model was claiming PESO distances not mentioned when they were in retrieved context.",
+      "correct_answer_note": "PESO Gas Cylinders Rules: 3.0m safety distance around flammable gas cylinders. OISD-STD-144: capacity-based distances (15m-30m+). These serve different scenarios (cylinder storage vs bulk LPG installations).",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-04",
+      "query": "What is the safe distance for an LPG vessel with exactly 20 Cu. Mt. capacity — does it fall under the 15m or 20m category?",
+      "query_type": "either_or_boundary",
+      "context_required": "None",
+      "expected_behavior": "Must open with a direct resolution of the either/or framing. Correct answer: 20 Cu. Mt. falls at the UPPER boundary of the 10-20 Cu. Mt. bracket, so the associated distance applies (not 15m which is for smaller vessels). Response must explicitly say which bracket applies and whether the boundary is inclusive. Must NOT dodge the binary framing by giving a generic distance overview.",
+      "failure_mode_tested": "Either/or questions must be resolved with explicit Yes/No/This-one framing before elaboration.",
+      "correct_answer_note": "Verify exact bracket from OISD-STD-144 Table. The 20 Cu.Mt. vessel typically falls under the 10-20 Cu.Mt. category.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-05",
+      "query": "What are the fire hydrant inspection intervals per OISD-141?",
+      "query_type": "not_in_corpus_with_related",
+      "context_required": "None",
+      "expected_behavior": "OISD-141 is NOT indexed. Must state this ONCE clearly. Must then naturally offer OISD-STD-144 or OISD-STD-116's related hydrant requirements (spacing, coverage, inspection) without repeating the 'not indexed' disclaimer. Must NOT repeat the absence disclaimer multiple times. Must NOT invent OISD-141 content.",
+      "failure_mode_tested": "Zero-coverage case with related nearby info — should gracefully offer the related document without disclaimer repetition.",
+      "correct_answer_note": "OISD-141 not indexed. OISD-STD-144 covers hydrant spacing and fire protection for LPG. OISD-STD-116 covers fire protection for refineries.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-06",
+      "query": "If PESO's Gas Cylinders Rules and OISD-STD-144 specify different safety distances for LPG cylinder storage, which takes precedence?",
+      "query_type": "precedence_legal",
+      "context_required": "None",
+      "expected_behavior": "Must (a) surface actual figures from BOTH documents retrieved, (b) explicitly note that legal/regulatory precedence is outside what document content can determine, (c) suggest consulting the relevant authority (PESO/OISD/MoPNG) ONLY for the precedence question — not for the figures already surfaced. Must NOT fabricate a precedence ranking. Must NOT withhold the actual figures.",
+      "failure_mode_tested": "Precedence/authority questions must surface facts from both sides while being transparent about the limits of document-based answers.",
+      "correct_answer_note": "PESO Gas Cylinders Rules covers cylinder storage (3.0m). OISD-STD-144 covers bulk LPG installations (capacity-based 15m+). These may apply to different contexts. Precedence depends on facility type and licensing authority.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-07",
+      "query": "What is the safe distance for CNG storage near a process unit?",
+      "query_type": "substance_conflation_trap",
+      "context_required": "None",
+      "expected_behavior": "Must NOT conflate CNG with LPG. If CNG is not covered in the indexed documents, must say so explicitly. Must NOT substitute LPG safe distance figures as if they apply to CNG. May note which gas types ARE covered (LPG, petroleum).",
+      "failure_mode_tested": "Substance conflation — CNG and LPG have different properties and standards. Mixing them is a factual error.",
+      "correct_answer_note": "CNG storage near process units is not covered by the indexed standards (OISD-STD-144 covers LPG, not CNG). LPG figures must not be presented as CNG figures.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-08",
+      "query": "What does OISD-STD-150 say about LPG bottling plant fire protection?",
+      "query_type": "standard_conflation_trap",
+      "context_required": "None",
+      "expected_behavior": "Must gently correct the conflation: OISD-STD-150 covers mounded LPG storage facilities, NOT bottling plants. Bottling plant fire protection is covered by OISD-GDN-169. If OISD-STD-150 IS indexed, should explain what it actually covers. If GDN-169 is indexed, redirect to it. Must NOT answer as if OISD-STD-150 covers bottling plants.",
+      "failure_mode_tested": "Standard conflation trap — user assumes wrong standard covers topic. Must correct rather than play along.",
+      "correct_answer_note": "OISD-STD-150: mounded LPG storage. OISD-GDN-169: LPG bottling plant safety. Neither may be in the current corpus — if so, state both are not indexed.",
+      "answer_correct": null,
+      "source_correct": null
+    },
+    {
+      "id": "EC-09",
+      "query": "What's the minimum safe distance for storage?",
+      "query_type": "ambiguous_underspecified",
+      "context_required": "None",
+      "expected_behavior": "Must NOT guess one substance/standard and present it as definitive. Should ask a SHORT clarifying question OR briefly present the 2-3 most relevant interpretations (e.g., LPG bulk storage per OISD-STD-144, petroleum per OISD-STD-116). Example ideal response: 'Safe distance requirements vary significantly by substance (LPG, petroleum, LNG) and storage capacity. Could you specify which storage type you're asking about, or would you like an overview of the main categories?'",
+      "failure_mode_tested": "Ambiguous underspecified queries must not receive a single-interpretation definitive answer.",
+      "correct_answer_note": "LPG bulk: OISD-STD-144 capacity-based table. Petroleum: OISD-STD-116. LNG: OISD-STD-194. Each has different distance requirements.",
+      "answer_correct": null,
+      "source_correct": null
+    }
+  ]
+}
