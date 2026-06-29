@@ -1,5 +1,7 @@
 import os
+import re
 import uuid
+import unicodedata
 from fastapi import APIRouter, HTTPException, Request
 from groq import Groq
 
@@ -204,4 +206,21 @@ async def translate_answer(request: Request):
         ],
     )
     translated = response.choices[0].message.content.strip()
+
+    # ── Fix Unicode garbling at English↔Hindi word boundaries ────────────
+    # 1. NFC-normalize: compose decomposed Devanagari codepoints (NFD → NFC)
+    #    so that base char + combining vowel sign become single precomposed chars.
+    translated = unicodedata.normalize("NFC", translated)
+
+    # 2. Strip orphaned combining marks (U+0300-U+036F, U+0900-U+0954)
+    #    that got stuck between Latin characters and Devanagari text.
+    #    Pattern: a Latin char followed by combining marks followed by Devanagari —
+    #    remove the combining marks to prevent garbled rendering.
+    translated = re.sub(
+        r'([A-Za-z0-9])[\u0300-\u036f\u0900-\u0954]+(?=[\u0905-\u097f])',
+        r'\1 ',
+        translated
+    )
+
     return {"translated": translated}
+

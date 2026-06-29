@@ -5,4 +5,4 @@ uvicorn backend.main:app --reload
 
 # terminal 2
 cd /Users/savyaraj/Desktop/policyiq/frontend
-npm run dev 
+npm run dev

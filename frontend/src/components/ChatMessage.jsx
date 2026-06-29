@@ -63,7 +63,7 @@ export default function ChatMessage({ role, content, sources, rate_limited, bloc
       if (!translatedText) {
         setIsTranslating(true);
         translateAnswer(content)
-          .then(({ translated }) => setTranslatedText(translated))
+          .then(({ translated }) => setTranslatedText(translated ? translated.normalize('NFC') : translated))
           .catch(e => console.error("Translation failed:", e))
           .finally(() => setIsTranslating(false));
       }

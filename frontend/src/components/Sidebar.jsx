@@ -51,12 +51,13 @@ export default function Sidebar({ isOpen, onClose, onSelectSession, onDeleteSess
         </div>
         <button 
           onClick={onClose}
-          className="p-1.5 rounded-md text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+          className="p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-navy transition-colors"
           title="Close sidebar"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="1.5"/>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 3v18M14 15l-3-3 3-3" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="M9 3v18" />
+            <path d="m16 15-3-3 3-3" />
           </svg>
         </button>
       </div>
