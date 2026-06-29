@@ -84,6 +84,27 @@ requirements.txt  → Python dependencies
 
 ---
 
+## ✅ Prerequisites Check
+
+Run this in your terminal to verify all dependencies are installed:
+
+```bash
+python --version && pip --version && node --version && npm --version && git --version
+```
+
+Expected output:
+```
+Python 3.10+
+pip 23.x+
+Node.js v18+
+npm 9.x+
+git version 2.x+
+```
+
+> If any command fails, install the missing tool before proceeding.
+
+---
+
 ## ⚡ Quickstart
 
 ```bash
