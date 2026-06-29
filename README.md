@@ -84,15 +84,24 @@ requirements.txt  → Python dependencies
 
 ---
 
-## Run PolicyIQ
+## ⚡ Quickstart
 
-```
+```bash
 git clone https://github.com/savya14/policyiq.git
 cd policyiq
+cp .env.example .env          # then open .env and add your Groq API key
 pip install -r requirements.txt
-# add .env with GROQ_API_KEY
+
+# Terminal 1 — Backend
 uvicorn backend.main:app --reload --port 8000
+
+# Terminal 2 — Frontend
+cd frontend && npm install && npm run dev
 ```
+
+> Vector store and all 39 regulatory PDFs are included in the repo. No indexing step needed.
+
+---
 
 ## Local Setup
 
@@ -121,30 +130,26 @@ GROQ_API_KEY=your_groq_api_key_here
 pip install -r requirements.txt
 ```
 
-### 4. Add regulatory documents
+### 4. Regulatory documents & vector index
 
-Place your PDF documents in `data/raw/`. PolicyIQ is built for OISD, PESO, PNGRB, and MoPNG standards.
-
-> PDFs are not included due to copyright. Obtain official copies from OISD/PESO/PNGRB directly.
-
-### 5. Build the vector index
+Both are included in the repo — no setup needed. To add new documents later:
 
 ```bash
-python -m indexing.build_index
+python -m indexing.update_index path/to/new_document.pdf
 ```
 
-Parses all PDFs, chunks them, generates embeddings, and saves the FAISS index to `vector_store/`. Run once, or when adding new documents.
-
-### 6. Run the backend
+### 5. Run the backend
 
 **Terminal 1:**
+
 ```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 
-### 7. Run the frontend
+### 6. Run the frontend
 
 **Terminal 2:**
+
 ```bash
 cd frontend
 npm install
