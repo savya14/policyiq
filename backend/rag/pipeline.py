@@ -21,8 +21,12 @@ from collections import defaultdict
 from functools import lru_cache
 from typing import Optional
 
-from langchain.chains import ConversationalRetrievalChain
-from langchain.prompts import (
+try:
+    from langchain_classic.chains import ConversationalRetrievalChain
+except ImportError:
+    from langchain.chains import ConversationalRetrievalChain
+
+from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     PromptTemplate,
