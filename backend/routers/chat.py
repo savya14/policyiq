@@ -207,7 +207,8 @@ async def translate_answer(request: Request):
     )
     translated = response.choices[0].message.content.strip()
     # Strip any <think>...</think> reasoning blocks some models emit
-    translated = re.sub(r'<think>.*?</think>', '', translated, flags=re.DOTALL).strip()
+    translated = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', translated, flags=re.DOTALL)
+    translated = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*$', '', translated, flags=re.DOTALL).strip()
 
     # ── Fix Unicode garbling at English↔Hindi word boundaries ────────────
     # 1. NFC-normalize: compose decomposed Devanagari codepoints (NFD → NFC)

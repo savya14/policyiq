@@ -76,6 +76,39 @@ def _append_history(session_id: str, human: str, ai: str) -> None:
         _sessions[session_id]["history"] = _sessions[session_id]["history"][-MAX_HISTORY_TURNS:]
 
 
+def _clean_answer(text: str) -> str:
+    """Sanitize LLM output by removing think blocks, stray formatting, and fixing citations."""
+    if not text:
+        return ""
+    # 1. Strip <think>...</think> blocks (case-insensitive, closed or unclosed)
+    cleaned = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', text, flags=re.DOTALL)
+    cleaned = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*$', '', cleaned, flags=re.DOTALL)
+
+    # 2. Clean filename prefixes in citations, e.g. [27_OISD_STD_144_LPG_Installations_Full, Page 25]
+    def _clean_citation(match):
+        raw = match.group(1)
+        raw = re.sub(r'^\d+_', '', raw)
+        raw = raw.replace('_Full', '').replace('_SOP', '').replace('.pdf', '')
+        raw = re.sub(r'OISD_STD_(\d+)', r'OISD-STD-\1', raw)
+        raw = raw.replace('_', ' ')
+        return f"[{raw}]"
+    
+    cleaned = re.sub(r'\[([0-9]+_[^\]]+)\]', _clean_citation, cleaned)
+
+    # 3. Strip standalone lines containing only stray punctuation or orphaned asterisks
+    lines = []
+    for line in cleaned.split('\n'):
+        stripped = line.strip()
+        if stripped in {'**', '*', '***', '____', '•'}:
+            continue
+        lines.append(line)
+    cleaned = '\n'.join(lines)
+
+    # 4. Clean up unmatched trailing asterisks
+    cleaned = re.sub(r'\*\*\s*$', '', cleaned).strip()
+    return cleaned
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Cached singletons
 # ─────────────────────────────────────────────────────────────────────────────
@@ -592,8 +625,7 @@ def ask(
         logger.error("Chain invocation failed for session %s: %s", session_id, exc)
         raise
 
-    answer: str = result["answer"]
-    # Strip any <think>...</think> reasoning blocks some models emit
-    answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
+    raw_answer: str = result["answer"]
+    answer: str = _clean_answer(raw_answer)
     _append_history(session_id, question, answer)
     return _ok(answer, _build_source_objects(result))
