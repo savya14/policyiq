@@ -84,10 +84,9 @@ def _append_history(session_id: str, human: str, ai: str) -> None:
 def _get_llm() -> ChatGroq:
     """Single shared ChatGroq instance for all classification and condensation calls."""
     return ChatGroq(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model="openai/gpt-oss-120b",
         temperature=0,
         groq_api_key=os.environ["GROQ_API_KEY"],
-        model_kwargs={"seed": 42},
     )
 
 
@@ -585,5 +584,7 @@ def ask(
         raise
 
     answer: str = result["answer"]
+    # Strip any <think>...</think> reasoning blocks some models emit
+    answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
     _append_history(session_id, question, answer)
     return _ok(answer, _build_source_objects(result))

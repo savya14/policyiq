@@ -191,7 +191,7 @@ async def translate_answer(request: Request):
         raise HTTPException(status_code=400, detail="No text provided")
     
     response = groq_client.chat.completions.create(
-        model="meta-llama/llama-4-scout-17b-16e-instruct",
+        model="openai/gpt-oss-120b",
         messages=[
             {
                 "role": "system",
@@ -206,6 +206,8 @@ async def translate_answer(request: Request):
         ],
     )
     translated = response.choices[0].message.content.strip()
+    # Strip any <think>...</think> reasoning blocks some models emit
+    translated = re.sub(r'<think>.*?</think>', '', translated, flags=re.DOTALL).strip()
 
     # ── Fix Unicode garbling at English↔Hindi word boundaries ────────────
     # 1. NFC-normalize: compose decomposed Devanagari codepoints (NFD → NFC)
