@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getStats } from '../api/client';
 import logo from '../assets/Indian_Oil_Logo.svg';
 import logoWhite from '../assets/Indian_Oil_Logo_White.svg';
 import rhinoVideo from '../assets/rhino2.mp4';
@@ -76,6 +77,19 @@ function ChatPreview() {
 }
 
 function Hero({ navigate }) {
+  const [stats, setStats] = useState({ pages: '...', circulars: '...' });
+
+  useEffect(() => {
+    getStats().then(data => {
+      if (data) {
+        setStats({
+          pages: data.pages_indexed?.toString() || '0',
+          circulars: data.circulars_tracked?.toString() || '0'
+        });
+      }
+    }).catch(console.error);
+  }, []);
+
   return (
     <section className="relative">
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -93,11 +107,7 @@ function Hero({ navigate }) {
       </div>
       <div className="relative mx-auto grid max-w-7xl items-start gap-14 px-6 pt-16 pb-20 md:grid-cols-2 md:pt-[112px] md:pb-28">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-navy backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-orange" />
-            REFINERIES DIVISION · INTERNAL
-          </div>
-          <h1 className="mt-6 text-6xl font-extrabold leading-[1.02] text-navy md:text-7xl" style={{ letterSpacing: '-0.02em' }}>
+          <h1 className="text-6xl font-extrabold leading-[1.02] text-navy md:text-7xl" style={{ letterSpacing: '-0.02em' }}>
             Compliance answers,
             <span className="block" style={{ background: 'linear-gradient(100deg, #1e2d78 0%, #f57c00 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               in seconds.
@@ -115,7 +125,7 @@ function Hero({ navigate }) {
             </button>
           </div>
           <dl className="mt-[40px] flex items-center gap-12 border-t border-slate-200 pt-8">
-            {[['283', 'PAGES INDEXED'], ['9', 'CIRCULARS TRACKED'], ['100%', 'ON-PREM']].map(([k, v]) => (
+            {[[stats.pages, 'PAGES INDEXED'], [stats.circulars, 'CIRCULARS TRACKED'], ['100%', 'ON-PREM']].map(([k, v]) => (
               <div key={v} className="flex flex-col">
                 <dt className="text-4xl font-bold text-[#1e2d78]" style={{ fontFamily: "'Space Grotesk', sans-serif", letterSpacing: '-0.04em' }}>{k}</dt>
                 <dd className="mt-1 text-sm font-medium tracking-wide text-slate-500">{v}</dd>

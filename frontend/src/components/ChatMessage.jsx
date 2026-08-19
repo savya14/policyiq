@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { submitFeedback, translateAnswer } from '../api/client';
 import logoIcon from '../assets/Indian_Oil_Icon.svg';
 import PDFViewerModal from './PDFViewerModal';
@@ -96,6 +97,7 @@ export default function ChatMessage({ role, content, sources, rate_limited, bloc
     try {
       return (
         <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
           components={{
             p: ({ children }) => (
               <p className={`mb-3 text-sm leading-relaxed ${isUser ? 'text-white' : 'text-slate-800'}`}>
@@ -131,6 +133,38 @@ export default function ChatMessage({ role, content, sources, rate_limited, bloc
               <ol className="mb-3 space-y-1.5 list-decimal list-inside pl-1">
                 {children}
               </ol>
+            ),
+            table: ({ children }) => (
+              <div className="my-3 overflow-x-auto rounded-lg border border-slate-200">
+                <table className="w-full text-sm border-collapse">
+                  {children}
+                </table>
+              </div>
+            ),
+            thead: ({ children }) => (
+              <thead className="bg-slate-100 text-slate-700">
+                {children}
+              </thead>
+            ),
+            tbody: ({ children }) => (
+              <tbody className="divide-y divide-slate-200">
+                {children}
+              </tbody>
+            ),
+            tr: ({ children }) => (
+              <tr className="hover:bg-slate-50 transition-colors">
+                {children}
+              </tr>
+            ),
+            th: ({ children }) => (
+              <th className="px-3 py-2 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider border-b border-slate-200">
+                {children}
+              </th>
+            ),
+            td: ({ children }) => (
+              <td className="px-3 py-2 text-sm text-slate-700 whitespace-nowrap">
+                {children}
+              </td>
             ),
           }}
         >

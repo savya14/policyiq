@@ -70,6 +70,39 @@ async def health_check():
     return {"status": "ok", "service": "PolicyIQ API"}
 
 
+@app.get("/api/stats")
+async def get_stats():
+    import pickle
+    import pathlib
+    pkl_path = pathlib.Path(__file__).resolve().parent.parent / "vector_store" / "index.pkl"
+    if not pkl_path.exists():
+        return {"pages_indexed": 0, "circulars_tracked": 0}
+    
+    try:
+        with open(pkl_path, "rb") as f:
+            docstore_data = pickle.load(f)
+            
+        docstore = docstore_data[0]
+        docs = list(docstore._dict.values())
+        
+        unique_docs = set()
+        unique_pages = set()
+        
+        for doc in docs:
+            src = doc.metadata.get("source", "Unknown")
+            page = doc.metadata.get("page", 0)
+            unique_docs.add(src)
+            unique_pages.add(f"{src}_{page}")
+            
+        return {
+            "pages_indexed": len(unique_pages),
+            "circulars_tracked": len(unique_docs)
+        }
+    except Exception as e:
+        return {"pages_indexed": 0, "circulars_tracked": 0, "error": str(e)}
+
+
+
 # ── PDF serving ───────────────────────────────────────────────────────────────
 import pathlib as _pathlib
 from fastapi import HTTPException as _HTTPException

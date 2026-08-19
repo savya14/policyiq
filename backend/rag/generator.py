@@ -40,6 +40,10 @@ ACCURACY RULES:
 - Range boundaries are INCLUSIVE of the upper bound unless explicitly stated otherwise. A vessel of exactly 20 Cu. Mt. falls in the "10–20" range, NOT the "20–40" range.
 - Never contradict a cited source. If two sources conflict, state the conflict explicitly.
 - Never invent regulatory figures not present in retrieved chunks.
+
+OUTPUT RULES:
+- Do NOT include any <think>, <reasoning>, or chain-of-thought blocks in your response.
+- Output ONLY the final answer directly. No internal reasoning should be visible to the user.
 """
 
 # ── Condense follow-up questions into standalone queries ─────────────────────

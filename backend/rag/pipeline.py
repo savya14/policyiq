@@ -192,7 +192,7 @@ OUT_OF_SCOPE — the query mentions oil/gas topics but is clearly outside what \
 IOCL's internal policy documents would cover (e.g. stock prices, news, political \
 opinions, competitor analysis).
 
-Reply with ONLY one word: SUMMARIZE_PAGE or POLICY or GENERAL or OUT_OF_SCOPE. No explanation."""
+Reply with ONLY one word: SUMMARIZE_PAGE or POLICY or GENERAL or OUT_OF_SCOPE. No explanation, no reasoning, no thinking."""
 
 
 def _classify(question: str) -> str:
@@ -208,7 +208,10 @@ def _classify(question: str) -> str:
     ]
     try:
         response = invoke_with_retry(llm.invoke, messages)
-        verdict = response.content.strip().upper()
+        raw = response.content.strip()
+        # Strip <think>...</think> blocks some models emit
+        raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+        verdict = raw.upper()
         logger.debug("Classifier verdict: '%s' for: %.60s", verdict, question)
         if verdict in {"SUMMARIZE_PAGE", "POLICY", "GENERAL", "OUT_OF_SCOPE"}:
             return verdict
@@ -382,7 +385,10 @@ def _handle_general_query(question: str, chat_history: list[dict], language: str
     messages.append({"role": "user", "content": question})
 
     response = invoke_with_retry(llm.invoke, messages)
-    return response.content.strip()
+    raw = response.content.strip()
+    # Strip <think>...</think> blocks some models emit
+    raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+    return raw
 
 def _handle_summarize_page(question: str, session_id: str, language: str) -> dict:
     llm = _get_llm()
@@ -394,7 +400,10 @@ Query: """ + question
     response = invoke_with_retry(llm.invoke, [{"role": "user", "content": extract_prompt}])
     try:
         import json
-        data = json.loads(response.content.strip().strip("`").replace("json\n", ""))
+        raw = response.content.strip()
+        # Strip <think>...</think> blocks some models emit
+        raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+        data = json.loads(raw.strip("`").replace("json\n", ""))
         doc_name = data.get("doc_name")
         page_num = data.get("page")
     except Exception as e:
