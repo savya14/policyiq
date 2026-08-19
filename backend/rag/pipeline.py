@@ -84,7 +84,7 @@ def _append_history(session_id: str, human: str, ai: str) -> None:
 def _get_llm() -> ChatGroq:
     """Single shared ChatGroq instance for all classification and condensation calls."""
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="meta-llama/llama-4-scout-17b-16e-instruct",
         temperature=0,
         groq_api_key=os.environ["GROQ_API_KEY"],
         model_kwargs={"seed": 42},
