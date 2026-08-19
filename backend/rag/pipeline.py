@@ -104,8 +104,18 @@ def _clean_answer(text: str) -> str:
         lines.append(line)
     cleaned = '\n'.join(lines)
 
-    # 4. Clean up unmatched trailing asterisks
-    cleaned = re.sub(r'\*\*\s*$', '', cleaned).strip()
+    # 4. Balance bold markers — strip any unmatched "**" per line
+    def _balance_bold(t: str) -> str:
+        out_lines = []
+        for line in t.split('\n'):
+            if line.count('**') % 2 != 0:
+                # odd number of ** on this line — drop the last one
+                idx = line.rfind('**')
+                line = line[:idx] + line[idx+2:]
+            out_lines.append(line)
+        return '\n'.join(out_lines)
+
+    cleaned = _balance_bold(cleaned).strip()
     return cleaned
 
 
