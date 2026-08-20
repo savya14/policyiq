@@ -226,12 +226,6 @@ export default function Chat() {
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
 
   return (
     <div className="h-screen bg-white flex overflow-hidden">

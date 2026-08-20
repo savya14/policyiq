@@ -51,13 +51,18 @@ SESSION_TTL_SECONDS = int(os.getenv("SESSION_TTL_SECONDS", "3600"))
 # Session memory store
 # ─────────────────────────────────────────────────────────────────────────────
 
-_sessions: dict[str, dict] = defaultdict(lambda: {"history": [], "last_active": time.time()})
+_sessions: dict[str, dict] = defaultdict(
+    lambda: {"history": [], "last_active": time.time()}
+)
 
 
 def _evict_stale_sessions() -> None:
     now = time.time()
-    stale = [sid for sid, data in _sessions.items()
-             if now - data["last_active"] > SESSION_TTL_SECONDS]
+    stale = [
+        sid
+        for sid, data in _sessions.items()
+        if now - data["last_active"] > SESSION_TTL_SECONDS
+    ]
     for sid in stale:
         del _sessions[sid]
 
@@ -73,7 +78,9 @@ def _append_history(session_id: str, human: str, ai: str) -> None:
     _sessions[session_id]["last_active"] = time.time()
     _sessions[session_id]["history"].append((human, ai))
     if len(_sessions[session_id]["history"]) > MAX_HISTORY_TURNS:
-        _sessions[session_id]["history"] = _sessions[session_id]["history"][-MAX_HISTORY_TURNS:]
+        _sessions[session_id]["history"] = _sessions[session_id]["history"][
+            -MAX_HISTORY_TURNS:
+        ]
 
 
 def _clean_answer(text: str) -> str:
@@ -81,39 +88,41 @@ def _clean_answer(text: str) -> str:
     if not text:
         return ""
     # 1. Strip <think>...</think> blocks (case-insensitive, closed or unclosed)
-    cleaned = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', text, flags=re.DOTALL)
-    cleaned = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*$', '', cleaned, flags=re.DOTALL)
+    cleaned = re.sub(
+        r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>", "", text, flags=re.DOTALL
+    )
+    cleaned = re.sub(r"<[Tt][Hh][Ii][Nn][Kk]>.*$", "", cleaned, flags=re.DOTALL)
 
     # 2. Clean filename prefixes in citations, e.g. [27_OISD_STD_144_LPG_Installations_Full, Page 25]
     def _clean_citation(match):
         raw = match.group(1)
-        raw = re.sub(r'^\d+_', '', raw)
-        raw = raw.replace('_Full', '').replace('_SOP', '').replace('.pdf', '')
-        raw = re.sub(r'OISD_STD_(\d+)', r'OISD-STD-\1', raw)
-        raw = raw.replace('_', ' ')
+        raw = re.sub(r"^\d+_", "", raw)
+        raw = raw.replace("_Full", "").replace("_SOP", "").replace(".pdf", "")
+        raw = re.sub(r"OISD_STD_(\d+)", r"OISD-STD-\1", raw)
+        raw = raw.replace("_", " ")
         return f"[{raw}]"
-    
-    cleaned = re.sub(r'\[([0-9]+_[^\]]+)\]', _clean_citation, cleaned)
+
+    cleaned = re.sub(r"\[([0-9]+_[^\]]+)\]", _clean_citation, cleaned)
 
     # 3. Strip standalone lines containing only stray punctuation or orphaned asterisks
     lines = []
-    for line in cleaned.split('\n'):
+    for line in cleaned.split("\n"):
         stripped = line.strip()
-        if stripped in {'**', '*', '***', '____', '•'}:
+        if stripped in {"**", "*", "***", "____", "•"}:
             continue
         lines.append(line)
-    cleaned = '\n'.join(lines)
+    cleaned = "\n".join(lines)
 
     # 4. Balance bold markers — strip any unmatched "**" per line
     def _balance_bold(t: str) -> str:
         out_lines = []
-        for line in t.split('\n'):
-            if line.count('**') % 2 != 0:
+        for line in t.split("\n"):
+            if line.count("**") % 2 != 0:
                 # odd number of ** on this line — drop the last one
-                idx = line.rfind('**')
-                line = line[:idx] + line[idx+2:]
+                idx = line.rfind("**")
+                line = line[:idx] + line[idx + 2:]
             out_lines.append(line)
-        return '\n'.join(out_lines)
+        return "\n".join(out_lines)
 
     cleaned = _balance_bold(cleaned).strip()
     return cleaned
@@ -122,6 +131,7 @@ def _clean_answer(text: str) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 # Cached singletons
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @lru_cache(maxsize=1)
 def _get_llm() -> ChatGroq:
@@ -153,12 +163,14 @@ def _get_chain(language: str = "en") -> ConversationalRetrievalChain:
             "Do NOT respond in English under any circumstances."
         )
 
-    qa_prompt = ChatPromptTemplate.from_messages([
-        SystemMessagePromptTemplate.from_template(system_prompt_text),
-        HumanMessagePromptTemplate.from_template(
-            "Context from policy documents:\n{context}\n\nQuestion: {question}"
-        ),
-    ])
+    qa_prompt = ChatPromptTemplate.from_messages(
+        [
+            SystemMessagePromptTemplate.from_template(system_prompt_text),
+            HumanMessagePromptTemplate.from_template(
+                "Context from policy documents:\n{context}\n\nQuestion: {question}"
+            ),
+        ]
+    )
 
     condense_prompt = PromptTemplate(
         input_variables=["chat_history", "question"],
@@ -183,8 +195,10 @@ def _get_chain(language: str = "en") -> ConversationalRetrievalChain:
 # Retry wrapper
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class RateLimitException(Exception):
     """Raised when the Groq API returns a 429 after all retries are exhausted."""
+
     pass
 
 
@@ -199,11 +213,16 @@ def invoke_with_retry(func, *args, max_retries: int = 3, **kwargs):
                     wait = 2 ** (attempt + 1)
                     logger.warning(
                         "[Retry] Groq rate limit — waiting %ds (attempt %d/%d): %s",
-                        wait, attempt + 1, max_retries, exc,
+                        wait,
+                        attempt + 1,
+                        max_retries,
+                        exc,
                     )
                     time.sleep(wait)
                 else:
-                    raise RateLimitException("Groq API rate limit exceeded after retries.")
+                    raise RateLimitException(
+                        "Groq API rate limit exceeded after retries."
+                    )
             else:
                 raise
 
@@ -253,12 +272,19 @@ def _classify(question: str) -> str:
         response = invoke_with_retry(llm.invoke, messages)
         raw = response.content.strip()
         # Strip <think>...</think> blocks some models emit
-        raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+        raw = re.sub(
+            r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>",
+            "",
+            raw,
+            flags=re.DOTALL,
+        ).strip()
         verdict = raw.upper()
         logger.debug("Classifier verdict: '%s' for: %.60s", verdict, question)
         if verdict in {"SUMMARIZE_PAGE", "POLICY", "GENERAL", "OUT_OF_SCOPE"}:
             return verdict
-        logger.warning("Unexpected classifier verdict '%s' — defaulting to POLICY", verdict)
+        logger.warning(
+            "Unexpected classifier verdict '%s' — defaulting to POLICY", verdict
+        )
         return "POLICY"
     except RateLimitException:
         raise
@@ -271,6 +297,7 @@ def _classify(question: str) -> str:
 # Gate 2 — FAISS similarity threshold
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _above_similarity_threshold(question: str) -> bool:
     retriever = get_retriever()
     vs = getattr(retriever, "vectorstore", None)
@@ -282,7 +309,9 @@ def _above_similarity_threshold(question: str) -> bool:
         if not results:
             return False
         _, score = results[0]
-        logger.debug("Similarity gate: score=%.3f threshold=%.3f", score, SIMILARITY_THRESHOLD)
+        logger.debug(
+            "Similarity gate: score=%.3f threshold=%.3f", score, SIMILARITY_THRESHOLD
+        )
         return score >= SIMILARITY_THRESHOLD
     except Exception as exc:
         logger.warning("Similarity gate error — failing open: %s", exc)
@@ -312,6 +341,7 @@ _LOW_SIMILARITY = (
 # ─────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _format_chat_history(history: list[tuple[str, str]]) -> str:
     lines = []
@@ -352,29 +382,65 @@ def _build_source_objects(result: dict) -> list[dict]:
         category = meta.get("category", "")
         category_label = category.replace("_", " ").title() if category else "General"
         section_val = meta.get("section", "General")
-        objects.append({
-            "source": src,
-            "section": category_label,
-            "page": str(meta.get("chunk_index", 0)),
-            "category": category_label,
-            "page_number": page_num,
-            "section_title": section_val if section_val != "General" else None,
-            "chunk_index": meta.get("chunk_index", 0),
-            "preview": doc.page_content.strip(),
-            "score": meta.get("score"),
-        })
+        objects.append(
+            {
+                "source": src,
+                "section": category_label,
+                "page": str(meta.get("chunk_index", 0)),
+                "category": category_label,
+                "page_number": page_num,
+                "section_title": section_val if section_val != "General" else None,
+                "chunk_index": meta.get("chunk_index", 0),
+                "preview": doc.page_content.strip(),
+                "score": meta.get("score"),
+            }
+        )
     return objects
 
 
 _GREETING_WORDS = {
-    "hi", "hello", "hey", "yo", "sup", "morning", "evening", "afternoon",
-    "good morning", "good evening", "good afternoon", "good night",
-    "greetings", "howdy", "hola", "namaste", "namaskar",
-    "thanks", "thank you", "thankyou", "thx", "ty",
-    "ok", "okay", "cool", "np", "cheers", "noted", "got it",
-    "sure", "alright", "great", "awesome", "perfect",
-    "bye", "goodbye", "see you", "later", "take care",
-    "what's up", "whats up", "wassup",
+    "hi",
+    "hello",
+    "hey",
+    "yo",
+    "sup",
+    "morning",
+    "evening",
+    "afternoon",
+    "good morning",
+    "good evening",
+    "good afternoon",
+    "good night",
+    "greetings",
+    "howdy",
+    "hola",
+    "namaste",
+    "namaskar",
+    "thanks",
+    "thank you",
+    "thankyou",
+    "thx",
+    "ty",
+    "ok",
+    "okay",
+    "cool",
+    "np",
+    "cheers",
+    "noted",
+    "got it",
+    "sure",
+    "alright",
+    "great",
+    "awesome",
+    "perfect",
+    "bye",
+    "goodbye",
+    "see you",
+    "later",
+    "take care",
+    "what's up",
+    "whats up",
+    "wassup",
 }
 
 
@@ -391,7 +457,9 @@ def _is_greeting(question: str) -> bool:
     return False
 
 
-def _handle_general_query(question: str, chat_history: list[dict], language: str = "en") -> str:
+def _handle_general_query(
+    question: str, chat_history: list[dict], language: str = "en"
+) -> str:
     """
     Handle GENERAL (non-compliance) queries.
     - Greetings and acknowledgements get a warm but compliance-focused response.
@@ -430,8 +498,11 @@ def _handle_general_query(question: str, chat_history: list[dict], language: str
     response = invoke_with_retry(llm.invoke, messages)
     raw = response.content.strip()
     # Strip <think>...</think> blocks some models emit
-    raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+    raw = re.sub(
+        r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>", "", raw, flags=re.DOTALL
+    ).strip()
     return raw
+
 
 def _handle_summarize_page(question: str, session_id: str, language: str) -> dict:
     llm = _get_llm()
@@ -439,40 +510,66 @@ def _handle_summarize_page(question: str, session_id: str, language: str) -> dic
 Respond in strict JSON format: {"doc_name": "...", "page": ...}
 If no page is found, set page to null.
 Query: """ + question
-    
-    response = invoke_with_retry(llm.invoke, [{"role": "user", "content": extract_prompt}])
+
+    response = invoke_with_retry(
+        llm.invoke, [{"role": "user", "content": extract_prompt}]
+    )
     try:
         import json
+
         raw = response.content.strip()
         # Strip <think>...</think> blocks some models emit
-        raw = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', raw, flags=re.DOTALL).strip()
+        raw = re.sub(
+            r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>",
+            "",
+            raw,
+            flags=re.DOTALL,
+        ).strip()
         data = json.loads(raw.strip("`").replace("json\n", ""))
         doc_name = data.get("doc_name")
         page_num = data.get("page")
     except Exception as e:
         raise ValueError(f"Failed to parse JSON: {e}")
-        
+
     if not doc_name or page_num is None:
         raise ValueError("Missing doc_name or page_num")
-        
+
     import pickle
     import pathlib
-    VECTOR_STORE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent / "vector_store"
+    import os
+
+    VECTOR_STORE_DIR = (
+        pathlib.Path(__file__).resolve().parent.parent.parent / "vector_store"
+    )
     pkl_path = VECTOR_STORE_DIR / "index.pkl"
-    with open(pkl_path, "rb") as f:
-        docstore_data = pickle.load(f)
-    docstore = docstore_data[0]
-    all_docs = list(docstore._dict.values())
-    
+    try:
+        if not os.access(pkl_path, os.R_OK):
+            raise ValueError("Vector store index is unreadable.")
+        with open(pkl_path, "rb") as f:
+            docstore_data = pickle.load(f)
+        docstore = docstore_data[0]
+        all_docs = list(docstore._dict.values())
+    except Exception as e:
+        logger.error("Failed to load FAISS index: %s", e)
+        raise ValueError(f"Could not load vector store: {e}")
+
     target_docs = []
     # Remove hyphens, underscores, and spaces for looser matching
-    search_doc_name = doc_name.lower().replace("-", "").replace("_", "").replace(" ", "")
+    search_doc_name = (
+        doc_name.lower().replace("-", "").replace("_", "").replace(" ", "")
+    )
     for d in all_docs:
-        src = d.metadata.get("source", "").lower().replace("-", "").replace("_", "").replace(" ", "")
+        src = (
+            d.metadata.get("source", "")
+            .lower()
+            .replace("-", "")
+            .replace("_", "")
+            .replace(" ", "")
+        )
         p = d.metadata.get("page")
         if search_doc_name in src and str(p) == str(page_num):
             target_docs.append(d)
-            
+
     def _create_response(answer: str, sources: list = None) -> dict:
         return {
             "answer": answer,
@@ -485,32 +582,39 @@ Query: """ + question
         }
 
     if not target_docs:
-        return _create_response(f"I couldn't find any content for page {page_num} of '{doc_name}'. Please ensure the document is uploaded and the page number is correct.")
-        
+        return _create_response(
+            f"I couldn't find any content for page {page_num} of '{doc_name}'. Please ensure the document is uploaded and the page number is correct."
+        )
+
     context = "\n\n".join([d.page_content for d in target_docs])
     system = f"You are PolicyIQ Assistant. Summarize the following document page accurately and comprehensively. Extract key points. IMPORTANT: The user specifically requested a summary for page {page_num}. Even if the text below contains a different printed page number (e.g. 'Page no. XX'), you MUST refer to it as Page {page_num} in your response to avoid confusing the user."
     if language == "hi":
         system += " Respond entirely in Hindi (Devanagari script), except for technical terms, standard names, and clause numbers which must remain in English."
-    
+
     messages = [
         {"role": "system", "content": system},
-        {"role": "user", "content": f"Context:\n{context}\n\nPlease summarize this page."}
+        {
+            "role": "user",
+            "content": f"Context:\n{context}\n\nPlease summarize this page.",
+        },
     ]
     summary_resp = invoke_with_retry(llm.invoke, messages)
     answer = summary_resp.content.strip()
-    
+
     _append_history(session_id, question, answer)
-    
+
     sources = _build_source_objects({"source_documents": target_docs})
     # Since we bypassed retriever, score is none. Force it to high confidence.
     for s in sources:
         s["score"] = 1.0
-        
+
     return _create_response(answer, sources)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Public API
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def ask(
     question: str,
@@ -564,7 +668,9 @@ def ask(
         logger.warning("Rate limit during classification.")
         return _rate_limited()
 
-    logger.info("[Pipeline] session=%s intent=%s query=%.80s", session_id, intent, question)
+    logger.info(
+        "[Pipeline] session=%s intent=%s query=%.80s", session_id, intent, question
+    )
 
     # ── 2a. General query branch (greetings, small talk, general knowledge) ───
     if intent == "GENERAL":

@@ -5,6 +5,7 @@ All endpoints except /admin/login require a valid Bearer JWT.
 Uploaded PDFs are parsed, chunked, embedded, and merged into the
 existing FAISS index via the same pipeline used by build_index.py.
 """
+
 import pathlib
 import sys
 import tempfile
@@ -13,10 +14,13 @@ import pickle
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 
 from backend.schemas import (
-    LoginRequest, LoginResponse,
-    DocumentsResponse, DocumentMeta,
-    UploadResponse, DeleteResponse,
-    FeedbackListResponse, FeedbackItem,
+    LoginRequest,
+    LoginResponse,
+    DocumentsResponse,
+    DocumentMeta,
+    UploadResponse,
+    DeleteResponse,
+    FeedbackListResponse,
 )
 from backend.auth import verify_password, create_token, require_admin
 
@@ -33,6 +37,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
+
 @router.post("/login", response_model=LoginResponse)
 async def login(body: LoginRequest):
     if not verify_password(body.password):
@@ -42,6 +47,7 @@ async def login(body: LoginRequest):
 
 # ── Documents ─────────────────────────────────────────────────────────────────
 
+
 @router.get("/documents", response_model=DocumentsResponse)
 async def list_documents(_: str = Depends(require_admin)):
     """
@@ -49,10 +55,14 @@ async def list_documents(_: str = Depends(require_admin)):
     Reads directly from the pickled docstore inside index.pkl.
     """
     pkl_path = VECTOR_STORE_DIR / "index.pkl"
-    if not pkl_path.exists():
-        return DocumentsResponse(documents=[])
-
     try:
+        if not pkl_path.exists():
+            return DocumentsResponse(documents=[])
+        import os
+
+        if not os.access(pkl_path, os.R_OK):
+            raise ValueError("Index file is not readable.")
+
         with open(pkl_path, "rb") as f:
             docstore_data = pickle.load(f)
 
@@ -63,6 +73,7 @@ async def list_documents(_: str = Depends(require_admin)):
 
         # Aggregate unique sources and count chunks per source
         from collections import Counter
+
         source_counts: Counter = Counter()
         for doc in docs:
             src = doc.metadata.get("source", "Unknown")
@@ -79,6 +90,7 @@ async def list_documents(_: str = Depends(require_admin)):
 
 
 # ── Upload ────────────────────────────────────────────────────────────────────
+
 
 @router.post("/upload", response_model=UploadResponse)
 async def upload_document(
@@ -97,13 +109,20 @@ async def upload_document(
     MAX_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
     contents = await file.read()
     if len(contents) > MAX_SIZE_BYTES:
-        raise HTTPException(status_code=413, detail="File too large. Maximum size is 50 MB.")
+        raise HTTPException(
+            status_code=413, detail="File too large. Maximum size is 50 MB."
+        )
 
     try:
         from indexing.parser import parse_document
         from indexing.chunker import chunk_document
         from indexing.embedder import get_embedding_model
-        from indexing.deduplicator import load_hashes, check_near_duplicate, mark_as_indexed, _normalise_key
+        from indexing.deduplicator import (
+            load_hashes,
+            check_near_duplicate,
+            mark_as_indexed,
+            _normalise_key,
+        )
         from langchain_community.vectorstores import FAISS
         import hashlib
 
@@ -113,10 +132,12 @@ async def upload_document(
         # 1. Exact duplicate check (SHA-256 content check)
         hashes = load_hashes()
         if file_hash in hashes.values():
-            existing_file = next((k for k, v in hashes.items() if v == file_hash), norm_name)
+            existing_file = next(
+                (k for k, v in hashes.items() if v == file_hash), norm_name
+            )
             return UploadResponse(
                 success=False,
-                message=f"Duplicate rejected: This exact document is already indexed under the filename '{existing_file}'."
+                message=f"Duplicate rejected: This exact document is already indexed under the filename '{existing_file}'.",
             )
 
         # 2. Near-duplicate standard check
@@ -133,7 +154,7 @@ async def upload_document(
                         "may create duplicate chunks and degrade retrieval quality. "
                         "If this is intentional (e.g. an amendment, errata, or different document type), "
                         "check 'Override standard warnings' and try again."
-                    )
+                    ),
                 )
 
         # Write to a temp file so parse_document (which expects a path) can read it
@@ -143,7 +164,10 @@ async def upload_document(
 
         pages = parse_document(tmp_path)
         if not pages:
-            return UploadResponse(success=False, message="Could not extract text from the PDF. It may be empty or corrupted.")
+            return UploadResponse(
+                success=False,
+                message="Could not extract text from the PDF. It may be empty or corrupted.",
+            )
 
         # Override source metadata to use the normalized filename, then join text
         source_name = pathlib.Path(norm_name).name
@@ -153,7 +177,9 @@ async def upload_document(
         # Pass pages list directly to chunk_document to preserve page-level metadata
         chunks = chunk_document(pages, source_name)
         if not chunks:
-            return UploadResponse(success=False, message="Document parsed but produced no chunks.")
+            return UploadResponse(
+                success=False, message="Document parsed but produced no chunks."
+            )
 
         # 3. Save raw PDF to data/raw/
         raw_dir = PROJECT_ROOT / "data" / "raw"
@@ -183,6 +209,7 @@ async def upload_document(
 
         # Invalidate the retriever cache so next query picks up new docs
         from backend.rag.retriever import _load_vectorstore
+
         _load_vectorstore.cache_clear()
 
         return UploadResponse(
@@ -196,11 +223,14 @@ async def upload_document(
     finally:
         try:
             pathlib.Path(tmp_path).unlink(missing_ok=True)
-        except Exception:
-            pass
+        except OSError as e:
+            import logging
+
+            logging.warning("Failed to unlink tmp file %s: %s", tmp_path, e)
 
 
 # ── Delete ─────────────────────────────────────────────────────────────────────
+
 
 @router.delete("/documents/{filename}", response_model=DeleteResponse)
 async def delete_document(
@@ -220,6 +250,7 @@ async def delete_document(
       5. Save back to vector_store/, clear LRU caches, clean registry, delete raw PDF.
     """
     import sys as _sys
+
     if str(PROJECT_ROOT) not in _sys.path:
         _sys.path.insert(0, str(PROJECT_ROOT))
 
@@ -277,15 +308,22 @@ async def delete_document(
     # Clear retriever cache so next query uses the new index
     try:
         from backend.rag.retriever import _load_vectorstore
+
         _load_vectorstore.cache_clear()
-    except Exception:
-        pass
+    except Exception as e:
+        import logging
+
+        logging.warning("Failed to clear vectorstore cache: %s", e)
 
     # Remove from hash registry
     try:
         remove_from_registry(filename)
-    except Exception:
-        pass  # Non-fatal — index is already clean
+    except Exception as e:
+        import logging
+
+        logging.warning(
+            "Failed to remove from hash registry: %s", e
+        )  # Non-fatal — index is already clean
 
     # Delete raw PDF from data/raw/ (recursive search)
     raw_dir = PROJECT_ROOT / "data" / "raw"
@@ -303,11 +341,14 @@ async def delete_document(
 
     return DeleteResponse(success=True, message=" ".join(detail_parts))
 
+
 # ── Feedback Logs ─────────────────────────────────────────────────────────────
+
 
 @router.get("/feedback", response_model=FeedbackListResponse)
 async def list_feedback(_: str = Depends(require_admin)):
     import json
+
     log_file = PROJECT_ROOT / "data" / "feedback_log.jsonl"
     feedbacks = []
     if log_file.exists():
@@ -317,22 +358,26 @@ async def list_feedback(_: str = Depends(require_admin)):
                     if line.strip():
                         feedbacks.append(json.loads(line))
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to read feedback log: {e}")
-            
+            raise HTTPException(
+                status_code=500, detail=f"Failed to read feedback log: {e}"
+            )
+
     # Return newest first
     feedbacks.reverse()
     return FeedbackListResponse(feedbacks=feedbacks)
 
+
 @router.delete("/feedback")
 async def delete_feedback(timestamp: str, _: str = Depends(require_admin)):
     import json
+
     log_file = PROJECT_ROOT / "data" / "feedback_log.jsonl"
     if not log_file.exists():
         raise HTTPException(status_code=404, detail="Feedback log not found")
-        
+
     kept_feedbacks = []
     deleted = False
-    
+
     try:
         with open(log_file, "r", encoding="utf-8") as f:
             for line in f:
@@ -344,14 +389,14 @@ async def delete_feedback(timestamp: str, _: str = Depends(require_admin)):
                     deleted = True
                 else:
                     kept_feedbacks.append(line)
-        
+
         if not deleted:
             raise HTTPException(status_code=404, detail="Feedback not found")
-            
+
         with open(log_file, "w", encoding="utf-8") as f:
             for line in kept_feedbacks:
                 f.write(line)
-                
+
         return {"success": True, "message": "Feedback deleted successfully"}
     except Exception as e:
         if isinstance(e, HTTPException):

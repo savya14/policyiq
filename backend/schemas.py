@@ -1,21 +1,21 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Union
-
+from typing import Optional, List
 
 # ── Chat ──────────────────────────────────────────────────────────────────────
 
+
 class SourceDocument(BaseModel):
     """A single retrieved chunk returned alongside an answer."""
-    source: str                      # filename, e.g. "06_OISD-STD-144_LPG_Installations.pdf"
-    section: Optional[str] = None   # legacy: human-readable category + chunk label
-    page: Optional[str] = None      # legacy: chunk index as string
+
+    source: str  # filename, e.g. "06_OISD-STD-144_LPG_Installations.pdf"
+    section: Optional[str] = None  # legacy: human-readable category + chunk label
+    page: Optional[str] = None  # legacy: chunk index as string
     category: Optional[str] = None
     page_number: Optional[str] = None
     section_title: Optional[str] = None
     chunk_index: Optional[int] = None
-    preview: Optional[str] = None   # first ~200 chars of chunk text
-    score: Optional[float] = None   # relevance score
-
+    preview: Optional[str] = None  # first ~200 chars of chunk text
+    score: Optional[float] = None  # relevance score
 
 
 class AskRequest(BaseModel):
@@ -30,6 +30,7 @@ class AskRequest(BaseModel):
     chat_history: List[dict] = Field(default_factory=list)
     language: str = "en"
 
+
 class AskResponse(BaseModel):
     answer: Optional[str] = None
     session_id: str
@@ -42,8 +43,10 @@ class AskResponse(BaseModel):
 
 # ── Admin / Auth ───────────────────────────────────────────────────────────────
 
+
 class LoginRequest(BaseModel):
     password: str
+
 
 class LoginResponse(BaseModel):
     token: str
@@ -51,22 +54,28 @@ class LoginResponse(BaseModel):
 
 # ── Documents ─────────────────────────────────────────────────────────────────
 
+
 class DocumentMeta(BaseModel):
     filename: str
     chunks: int
 
+
 class DocumentsResponse(BaseModel):
     documents: List[DocumentMeta] = []
+
 
 class UploadResponse(BaseModel):
     success: bool
     message: str
 
+
 class DeleteResponse(BaseModel):
     success: bool
     message: str
 
+
 # ── Feedback ──────────────────────────────────────────────────────────────────
+
 
 class FeedbackRequest(BaseModel):
     query: str
@@ -74,8 +83,10 @@ class FeedbackRequest(BaseModel):
     sources: List[dict]
     is_positive: bool
 
+
 class FeedbackResponse(BaseModel):
     success: bool
+
 
 class FeedbackItem(BaseModel):
     timestamp: str
@@ -84,6 +95,6 @@ class FeedbackItem(BaseModel):
     sources: List[dict]
     is_positive: bool
 
+
 class FeedbackListResponse(BaseModel):
     feedbacks: List[FeedbackItem]
-

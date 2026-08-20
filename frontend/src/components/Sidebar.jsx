@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { getPublicDocuments } from '../api/client';
 import logo from '../assets/Indian_Oil_Logo.svg';
 
 export default function Sidebar({ isOpen, onClose, onSelectSession, onDeleteSession, currentSessionId, onOpenDocuments }) {

@@ -9,7 +9,14 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 from backend.rag.pipeline import ask
-from backend.schemas import AskRequest, AskResponse, FeedbackRequest, FeedbackResponse, DocumentsResponse, DocumentMeta
+from backend.schemas import (
+    AskRequest,
+    AskResponse,
+    FeedbackRequest,
+    FeedbackResponse,
+    DocumentsResponse,
+    DocumentMeta,
+)
 import json
 import pickle
 import pathlib
@@ -35,9 +42,7 @@ def is_prompt_safe(user_query: str) -> tuple[bool, str]:
     try:
         response = groq_client.chat.completions.create(
             model="meta-llama/llama-prompt-guard-2-86m",
-            messages=[
-                {"role": "user", "content": user_query}
-            ],
+            messages=[{"role": "user", "content": user_query}],
         )
         result = response.choices[0].message.content.strip().upper()
 
@@ -72,7 +77,9 @@ async def ask_endpoint(request: Request, payload: AskRequest) -> AskResponse:
       are automatically rewritten into standalone queries before retrieval.
     """
     user_query = payload.question
-    print(f"--- RECEIVED ASK REQUEST: language='{payload.language}', question='{user_query}' ---")
+    print(
+        f"--- RECEIVED ASK REQUEST: language='{payload.language}', question='{user_query}' ---"
+    )
 
     # --- NEW: GUARD CHECK ---
     is_safe, label = is_prompt_safe(user_query)
@@ -90,16 +97,16 @@ async def ask_endpoint(request: Request, payload: AskRequest) -> AskResponse:
                 "Your query was flagged as a potential "
                 "prompt injection attempt. Please ask a "
                 "genuine compliance question."
-            )
+            ),
         )
 
     # --- EXISTING: RAG PIPELINE ---
     try:
         result = ask(
-            question=user_query, 
-            session_id=payload.session_id, 
-            chat_history=payload.chat_history, 
-            language=payload.language
+            question=user_query,
+            session_id=payload.session_id,
+            chat_history=payload.chat_history,
+            language=payload.language,
         )
         # Ensure default blocked/block_reason are populated
         result["blocked"] = False
@@ -109,6 +116,7 @@ async def ask_endpoint(request: Request, payload: AskRequest) -> AskResponse:
 
     return AskResponse(**result)
 
+
 @router.post("/feedback", response_model=FeedbackResponse)
 async def submit_feedback(request: FeedbackRequest) -> FeedbackResponse:
     """
@@ -117,21 +125,22 @@ async def submit_feedback(request: FeedbackRequest) -> FeedbackResponse:
     """
     log_file = "data/feedback_log.jsonl"
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    
+
     entry = {
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "query": request.query,
         "response": request.response,
         "sources": request.sources,
-        "is_positive": request.is_positive
+        "is_positive": request.is_positive,
     }
-    
+
     try:
         with open(log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")
         return FeedbackResponse(success=True)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to log feedback: {exc}")
+
 
 @router.get("/documents", response_model=DocumentsResponse)
 async def list_documents():
@@ -141,14 +150,25 @@ async def list_documents():
     Public endpoint for the chat interface sidebar.
     """
     from collections import Counter
+
     source_counts = Counter()
-    
+
     pkl_path = VECTOR_STORE_DIR / "index.pkl"
     if pkl_path.exists():
         try:
-            with open(pkl_path, "rb") as f:
-                docstore_data = pickle.load(f)
-            docstore = docstore_data[0]
+            try:
+                import os
+
+                if not os.access(pkl_path, os.R_OK):
+                    raise ValueError("Index file is not readable.")
+                with open(pkl_path, "rb") as f:
+                    docstore_data = pickle.load(f)
+                docstore = docstore_data[0]
+            except Exception as e:
+                import logging
+
+                logging.error("Failed to load FAISS index: %s", e)
+                raise ValueError(f"Could not load vector store: {e}")
             for doc in docstore._dict.values():
                 src = doc.metadata.get("source", "Unknown")
                 source_counts[src] += 1
@@ -159,16 +179,17 @@ async def list_documents():
     pdf_files = set()
     raw_dir = PROJECT_ROOT / "data" / "raw"
     archive_dir = PROJECT_ROOT / "data" / "archive"
-    
+
     for folder in [raw_dir, archive_dir]:
         if folder.exists():
             for p in folder.glob("*.pdf"):
                 pdf_files.add(p.name)
-                
+
     # Map chunk counts to physical files robustly
     import re
+
     def normalize(name):
-        return re.sub(r'^(\d+_)+', '', name)
+        return re.sub(r"^(\d+_)+", "", name)
 
     document_list = []
     for disk_file in sorted(pdf_files):
@@ -182,14 +203,14 @@ async def list_documents():
 
     return DocumentsResponse(documents=document_list)
 
+
 @router.post("/translate")
 async def translate_answer(request: Request):
-    import json as _json
     body = await request.json()
     text = body.get("text", "")
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
-    
+
     response = groq_client.chat.completions.create(
         model="openai/gpt-oss-120b",
         messages=[
@@ -200,15 +221,22 @@ async def translate_answer(request: Request):
                     "Keep all technical terms, standard names (OISD, PESO, PNGRB), clause numbers, document names, "
                     "measurement units, and citations like [OISD-STD-144, Page 25] in English. "
                     "Translate only the explanatory text to Hindi. Return only the translated text, nothing else."
-                )
+                ),
             },
-            {"role": "user", "content": text}
+            {"role": "user", "content": text},
         ],
     )
     translated = response.choices[0].message.content.strip()
     # Strip any <think>...</think> reasoning blocks some models emit
-    translated = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>', '', translated, flags=re.DOTALL)
-    translated = re.sub(r'<[Tt][Hh][Ii][Nn][Kk]>.*$', '', translated, flags=re.DOTALL).strip()
+    translated = re.sub(
+        r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>",
+        "",
+        translated,
+        flags=re.DOTALL,
+    )
+    translated = re.sub(
+        r"<[Tt][Hh][Ii][Nn][Kk]>.*$", "", translated, flags=re.DOTALL
+    ).strip()
 
     # ── Fix Unicode garbling at English↔Hindi word boundaries ────────────
     # 1. NFC-normalize: compose decomposed Devanagari codepoints (NFD → NFC)
@@ -220,10 +248,9 @@ async def translate_answer(request: Request):
     #    Pattern: a Latin char followed by combining marks followed by Devanagari —
     #    remove the combining marks to prevent garbled rendering.
     translated = re.sub(
-        r'([A-Za-z0-9])[\u0300-\u036f\u0900-\u0954]+(?=[\u0905-\u097f])',
-        r'\1 ',
-        translated
+        r"([A-Za-z0-9])[\u0300-\u036f\u0900-\u0954]+(?=[\u0905-\u097f])",
+        r"\1 ",
+        translated,
     )
 
     return {"translated": translated}
-

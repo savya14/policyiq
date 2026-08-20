@@ -13,13 +13,16 @@ from dotenv import load_dotenv
 # Shim pkgutil.find_loader for Python 3.14+ compatibility (used by pytesseract)
 import pkgutil
 import importlib.util
+
 if not hasattr(pkgutil, "find_loader"):
+
     def _find_loader(fullname):
         try:
             spec = importlib.util.find_spec(fullname)
             return spec.loader if spec is not None else None
         except Exception:
             return None
+
     pkgutil.find_loader = _find_loader
 
 # Must be called before any other import that reads env vars
@@ -42,14 +45,16 @@ cors_origins_env = os.getenv("CORS_ORIGINS", "")
 origins = [o.strip() for o in cors_origins_env.split(",") if o.strip()]
 
 if app_env != "production":
-    origins.extend([
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-        "http://127.0.0.1:3000",
-    ])
+    origins.extend(
+        [
+            "http://localhost:5173",
+            "http://localhost:5174",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173",
+            "http://127.0.0.1:5174",
+            "http://127.0.0.1:3000",
+        ]
+    )
 
 origins = [o for o in origins if o]  # remove empty strings
 
@@ -74,33 +79,45 @@ async def health_check():
 async def get_stats():
     import pickle
     import pathlib
-    pkl_path = pathlib.Path(__file__).resolve().parent.parent / "vector_store" / "index.pkl"
+
+    pkl_path = (
+        pathlib.Path(__file__).resolve().parent.parent / "vector_store" / "index.pkl"
+    )
     if not pkl_path.exists():
         return {"pages_indexed": 0, "circulars_tracked": 0}
-    
+
     try:
+        if not os.access(pkl_path, os.R_OK):
+            return {
+                "pages_indexed": 0,
+                "circulars_tracked": 0,
+                "error": "Index file not readable",
+            }
+
         with open(pkl_path, "rb") as f:
             docstore_data = pickle.load(f)
-            
+
         docstore = docstore_data[0]
         docs = list(docstore._dict.values())
-        
+
         unique_docs = set()
         unique_pages = set()
-        
+
         for doc in docs:
             src = doc.metadata.get("source", "Unknown")
             page = doc.metadata.get("page", 0)
             unique_docs.add(src)
             unique_pages.add(f"{src}_{page}")
-            
+
         return {
             "pages_indexed": len(unique_pages),
-            "circulars_tracked": len(unique_docs)
+            "circulars_tracked": len(unique_docs),
         }
     except Exception as e:
-        return {"pages_indexed": 0, "circulars_tracked": 0, "error": str(e)}
+        import logging
 
+        logging.getLogger(__name__).warning("Failed to load FAISS index stats: %s", e)
+        return {"pages_indexed": 0, "circulars_tracked": 0, "error": str(e)}
 
 
 # ── PDF serving ───────────────────────────────────────────────────────────────
@@ -116,24 +133,36 @@ _PDF_DIRS = [
 _THUMBNAIL_DIR = _pathlib.Path(__file__).resolve().parent.parent / "data" / "thumbnails"
 _THUMBNAIL_DIR.mkdir(parents=True, exist_ok=True)
 
+
+def _resolve_pdf_path(filename: str):
+    """Find a PDF by exact match or by suffix (to handle index vs disk prefix mismatches)."""
+    for folder in _PDF_DIRS:
+        if not folder.exists():
+            continue
+        # 1. Exact match
+        p = folder / filename
+        if p.exists() and p.is_file() and p.suffix.lower() == ".pdf":
+            return p
+        # 2. Suffix match (e.g. index has 'doc.pdf', disk has '39_doc.pdf')
+        for f in folder.iterdir():
+            if f.is_file() and f.suffix.lower() == ".pdf" and f.name.endswith(filename):
+                return f
+    return None
+
+
 @app.get("/api/thumbnails/{filename}")
 async def serve_thumbnail(filename: str):
     import pypdfium2 as pdfium
-    
+
     thumb_path = _THUMBNAIL_DIR / f"{filename}.jpg"
     if thumb_path.exists():
         return _FileResponse(str(thumb_path), media_type="image/jpeg")
-        
-    pdf_path = None
-    for folder in _PDF_DIRS:
-        p = folder / filename
-        if p.exists() and p.suffix.lower() == ".pdf":
-            pdf_path = p
-            break
-            
+
+    pdf_path = _resolve_pdf_path(filename)
+
     if not pdf_path:
         raise _HTTPException(status_code=404, detail=f"PDF not found: {filename}")
-        
+
     try:
         pdf = pdfium.PdfDocument(str(pdf_path))
         page = pdf.get_page(0)
@@ -143,16 +172,18 @@ async def serve_thumbnail(filename: str):
         pdf.close()
         return _FileResponse(str(thumb_path), media_type="image/jpeg")
     except Exception as e:
-        raise _HTTPException(status_code=500, detail=f"Failed to generate thumbnail: {str(e)}")
+        raise _HTTPException(
+            status_code=500, detail=f"Failed to generate thumbnail: {str(e)}"
+        )
+
 
 @app.get("/api/documents/{filename}")
 async def serve_pdf(filename: str):
-    for folder in _PDF_DIRS:
-        path = folder / filename
-        if path.exists() and path.suffix.lower() == ".pdf":
-            return _FileResponse(
-                str(path),
-                media_type="application/pdf",
-                headers={"Content-Disposition": f"inline; filename={filename}"},
-            )
+    pdf_path = _resolve_pdf_path(filename)
+    if pdf_path:
+        return _FileResponse(
+            str(pdf_path),
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"inline; filename={pdf_path.name}"},
+        )
     raise _HTTPException(status_code=404, detail=f"PDF not found: {filename}")

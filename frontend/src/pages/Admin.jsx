@@ -74,7 +74,11 @@ export default function Admin() {
   };
 
   useEffect(() => {
-    if (token) loadData();
+    if (token) {
+      loadDocuments();
+      loadFeedback();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleFile = (file) => {

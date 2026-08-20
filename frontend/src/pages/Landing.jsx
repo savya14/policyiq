@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStats } from '../api/client';
 import logo from '../assets/Indian_Oil_Logo.svg';
@@ -211,7 +211,7 @@ function Solution() {
     <section className="mx-auto max-w-7xl px-6 py-20">
       <div className="mx-auto max-w-3xl text-center">
         <Eyebrow>The solution</Eyebrow>
-        <h2 className="mt-3 text-3xl font-bold leading-[1.1] text-navy md:text-5xl" style={{ letterSpacing: '-0.02em' }}>A RAG pipeline built around IOCL's documents.</h2>
+        <h2 className="mt-3 text-3xl font-bold leading-[1.1] text-navy md:text-5xl" style={{ letterSpacing: '-0.02em' }}>A RAG pipeline built around IOCL&apos;s documents.</h2>
       </div>
       <div className="mt-14 grid gap-5 md:grid-cols-3">
         {items.map((item) => (

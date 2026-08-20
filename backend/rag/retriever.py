@@ -7,6 +7,7 @@ underlying FAISS retriever to:
   - run targeted follow-up queries for PESO/PNGRB when the main search misses them
   - deduplicate and normalise metadata before returning docs to the chain
 """
+
 import os
 import functools
 import pathlib
@@ -23,9 +24,11 @@ RERANK_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 VECTOR_STORE_DIR = PROJECT_ROOT / "vector_store"
 
+
 @functools.lru_cache(maxsize=1)
 def _load_cross_encoder():
     from sentence_transformers import CrossEncoder
+
     return CrossEncoder(RERANK_MODEL, device="cpu")
 
 
@@ -129,12 +132,16 @@ class SanitizingRetriever(BaseRetriever):
                 reranker = _load_cross_encoder()
                 pairs = [(query, doc.page_content) for doc in docs]
                 scores = reranker.predict(pairs)
-                
+
                 for doc, score in zip(docs, scores):
                     doc.metadata["rerank_score"] = float(score)
-                
+
                 # Sort descending by rerank score
-                docs = sorted(docs, key=lambda d: d.metadata.get("rerank_score", 0.0), reverse=True)
+                docs = sorted(
+                    docs,
+                    key=lambda d: d.metadata.get("rerank_score", 0.0),
+                    reverse=True,
+                )
                 # Keep top-k
                 docs = docs[:k]
             except Exception as e:
@@ -154,9 +161,7 @@ class SanitizingRetriever(BaseRetriever):
         extra_queries: list[str] = []
 
         if "peso" in query_lower:
-            has_peso = any(
-                "peso" in d.metadata.get("source", "").lower() for d in docs
-            )
+            has_peso = any("peso" in d.metadata.get("source", "").lower() for d in docs)
             if not has_peso:
                 if "cylinder" in query_lower or "storage" in query_lower:
                     extra_queries.append("PESO cylinder storage")
@@ -164,7 +169,11 @@ class SanitizingRetriever(BaseRetriever):
                     extra_queries.append("PESO petroleum rules")
                 if "explosive" in query_lower:
                     extra_queries.append("PESO explosives rules")
-                if "smpv" in query_lower or "pressure vessel" in query_lower or "unfired" in query_lower:
+                if (
+                    "smpv" in query_lower
+                    or "pressure vessel" in query_lower
+                    or "unfired" in query_lower
+                ):
                     extra_queries.append("PESO SMPV rules")
                 if not extra_queries:
                     extra_queries.append("PESO safety regulations")
@@ -197,8 +206,10 @@ class SanitizingRetriever(BaseRetriever):
                         )
                         for d in raw[:2]
                     )
-            except Exception:
-                pass
+            except Exception as e:
+                import logging
+
+                logging.warning("Expansion query failed: %s", e)
 
         return docs
 

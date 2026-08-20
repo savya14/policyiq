@@ -4,6 +4,7 @@ Auth helpers for PolicyIQ admin endpoints.
 Uses a secure ADMIN_PASSWORD env var hashed with bcrypt.
 On success, issues a short-lived JWT signed with JWT_SECRET.
 """
+
 import os
 import time
 import jwt
@@ -14,8 +15,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 _bearer = HTTPBearer()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
-if not JWT_SECRET or JWT_SECRET == "change-me-in-production":
-    raise RuntimeError("JWT_SECRET is not set or uses the default insecure value.")
+if not JWT_SECRET:
+    raise RuntimeError("JWT_SECRET is not set in the environment.")
 
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 if not ADMIN_PASSWORD:

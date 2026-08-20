@@ -44,8 +44,11 @@ function norm(str) {
   if (!str) return '';
   return expandLigatures(str)
     .toLowerCase()
+    // eslint-disable-next-line no-control-regex
     .replace(/([a-z0-9])-([a-z0-9])/g, '$1\x00$2')
+    // eslint-disable-next-line no-control-regex
     .replace(/[^a-z0-9\x00]/g, ' ')
+    // eslint-disable-next-line no-control-regex
     .replace(/\x00/g, '-')
     .replace(/\s+/g, ' ')
     .trim();
