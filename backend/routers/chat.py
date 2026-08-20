@@ -211,23 +211,40 @@ async def translate_answer(request: Request):
     if not text:
         raise HTTPException(status_code=400, detail="No text provided")
 
-    response = groq_client.chat.completions.create(
-        model="openai/gpt-oss-120b",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a precise translator. Translate the given English compliance text to Hindi (Devanagari script). "
-                    "Keep all technical terms, standard names (OISD, PESO, PNGRB), clause numbers, document names, "
-                    "measurement units, and citations like [OISD-STD-144, Page 25] in English. "
-                    "Translate only the explanatory text to Hindi. Return only the translated text, nothing else."
-                ),
-            },
-            {"role": "user", "content": text},
-        ],
+    system_prompt = (
+        "You are a professional Hindi translator for Indian Oil Corporation Limited (IOCL) compliance and safety documents.\n"
+        "Translate the given English regulatory compliance text entirely into natural, accurate, formal Hindi in Devanagari script.\n\n"
+        "CRITICAL TRANSLATION & FORMATTING RULES:\n"
+        "1. TRANSLATE ALL EXPLANATIONS, DESCRIPTIONS & TABLE CONTENT:\n"
+        "   - Translate all Markdown table headers into clear Hindi (e.g., 'Application / Location' -> 'अनुप्रयोग / स्थान', 'Calibration Frequency' -> 'कैलिब्रेशन आवृत्ति / अंतराल', 'Minimum Distance' -> 'न्यूनतम दूरी', 'Vessel Capacity' -> 'पात्र क्षमता').\n"
+        "   - Translate all table cell text, time intervals, and descriptions into Hindi (e.g., 'once every 6 months' -> 'हर 6 महीने में एक बार', 'once a week' -> 'सप्ताह में एक बार', 'General LPG installation' -> 'सामान्य LPG स्थापना').\n"
+        "   - Translate lead-in summaries, bullet points, and source notes into fluent Hindi.\n"
+        "2. STRICTLY PRESERVE ALL MARKDOWN STRUCTURE:\n"
+        "   - Keep all table rows, column separators (`|`), alignment rows (`| :--- | :--- |`), bullet dashes (`-`), and bold tags (`**...**`) strictly intact.\n"
+        "   - Ensure every bold marker `**` has its matching closing `**` on the same line.\n"
+        "3. PRESERVE ONLY SPECIFIC ENTITY NAMES IN ENGLISH:\n"
+        "   - Keep standard names (e.g., OISD-STD-144, PESO, PNGRB, MoPNG), section numbers (e.g., Section 9.5.9.3), rule numbers (e.g., Rule 138), and measurement units/symbols (e.g., m, m³, Cu. Mt., kg/cm², psi, bar) in English.\n"
+        "   - Everything else must be rendered in Hindi Devanagari script.\n"
+        "4. NO THINKING/META COMMENTARY:\n"
+        "   - Output ONLY the translated Markdown response. No conversational phrases, preamble, or commentary."
     )
-    translated = response.choices[0].message.content.strip()
-    # Strip any <think>...</think> reasoning blocks some models emit
+
+    try:
+        response = groq_client.chat.completions.create(
+            model="openai/gpt-oss-120b",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": text},
+            ],
+            temperature=0.1,
+        )
+        translated = response.choices[0].message.content.strip()
+    except Exception as e:
+        import logging
+        logging.error("Translation API error: %s", e)
+        raise HTTPException(status_code=500, detail=f"Translation failed: {e}")
+
+    # Strip any <think>...</think> reasoning blocks
     translated = re.sub(
         r"<[Tt][Hh][Ii][Nn][Kk]>.*?</[Tt][Hh][Ii][Nn][Kk]>",
         "",
@@ -239,18 +256,20 @@ async def translate_answer(request: Request):
     ).strip()
 
     # ── Fix Unicode garbling at English↔Hindi word boundaries ────────────
-    # 1. NFC-normalize: compose decomposed Devanagari codepoints (NFD → NFC)
-    #    so that base char + combining vowel sign become single precomposed chars.
     translated = unicodedata.normalize("NFC", translated)
-
-    # 2. Strip orphaned combining marks (U+0300-U+036F, U+0900-U+0954)
-    #    that got stuck between Latin characters and Devanagari text.
-    #    Pattern: a Latin char followed by combining marks followed by Devanagari —
-    #    remove the combining marks to prevent garbled rendering.
     translated = re.sub(
         r"([A-Za-z0-9])[\u0300-\u036f\u0900-\u0954]+(?=[\u0905-\u097f])",
         r"\1 ",
         translated,
     )
+
+    # Balance bold markers per line
+    out_lines = []
+    for line in translated.split("\n"):
+        if line.count("**") % 2 != 0:
+            idx = line.rfind("**")
+            line = line[:idx] + line[idx + 2:]
+        out_lines.append(line)
+    translated = "\n".join(out_lines).strip()
 
     return {"translated": translated}
